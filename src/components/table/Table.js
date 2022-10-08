@@ -23,7 +23,7 @@ const Table = ({
   responsive,
 }) => {
   const dispatch = useDispatch();
-
+  console.log(tableData);
   const handleClick = (item) => {
     dispatch(selectRating({ selected: item }));
   };
@@ -57,11 +57,10 @@ const Table = ({
         </thead>
         <tbody className="w-100">
           {tableData?.data.map((item, i) => {
-            if (
-              item.prices.total === 0 ||
-              item.prices.subTotal === 0 ||
-              Object.keys(item).length === 0
-            ) {
+            if (item === null) {
+              return;
+            }
+            if (Object.keys(item).length === 0 || item.prices.subTotal === 0) {
               return;
             }
             return (

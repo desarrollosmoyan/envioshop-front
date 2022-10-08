@@ -26,7 +26,7 @@ export default function Pos() {
       <Head title="POS" />
       <PosModalForm />
       <Content>
-        <BlockHead size="sm">
+        <BlockHead size="sm" className="mb-0">
           <BlockBetween>
             <BlockHeadContent>
               <BlockTitle page tag="h3">
@@ -45,17 +45,20 @@ export default function Pos() {
           </BlockBetween>
         </BlockHead>
         <Block>
-          <Container className="container-fluid">
+          <Container className="container-fluid border">
             <Row>
               <Col md="6" className="mb-5">
                 <PosForm />
               </Col>
-              <Col lg="6">
+              <Col lg="6" style={{ height: "100%" }}>
                 {!rating.data ? (
                   <></>
                 ) : (
                   <>
-                    <Row style={{ height: "40%", overflowX: "hidden" }}>
+                    <Row
+                      className="border"
+                      style={{ height: "40%", overflowX: "hidden" }}
+                    >
                       <Table
                         responsive
                         border

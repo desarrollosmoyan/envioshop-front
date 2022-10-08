@@ -2,7 +2,12 @@ import React from "react";
 import { Pagination, PaginationLink, PaginationItem } from "reactstrap";
 import Icon from "../icon/Icon";
 
-const PaginationComponent = ({ itemPerPage, totalItems, paginate, currentPage }) => {
+const PaginationComponent = ({
+  itemPerPage,
+  totalItems,
+  paginate,
+  currentPage,
+}) => {
   const pageNumbers = [];
 
   for (let i = 1; i <= Math.ceil(totalItems / itemPerPage); i++) {
@@ -29,12 +34,15 @@ const PaginationComponent = ({ itemPerPage, totalItems, paginate, currentPage })
           href="#prev"
         >
           <Icon name="chevrons-left" />
-          <span>Prev</span>
+          <span>Anterior</span>
         </PaginationLink>
       </PaginationItem>
       {pageNumbers.map((item) => {
         return (
-          <PaginationItem className={currentPage === item ? "active" : ""} key={item}>
+          <PaginationItem
+            className={currentPage === item ? "active" : ""}
+            key={item}
+          >
             <PaginationLink
               tag="a"
               href="#pageitem"
@@ -49,7 +57,9 @@ const PaginationComponent = ({ itemPerPage, totalItems, paginate, currentPage })
         );
       })}
 
-      <PaginationItem disabled={pageNumbers[pageNumbers.length - 1] === currentPage}>
+      <PaginationItem
+        disabled={pageNumbers[pageNumbers.length - 1] === currentPage}
+      >
         <PaginationLink
           className="page-link-next"
           onClick={(ev) => {
@@ -58,7 +68,7 @@ const PaginationComponent = ({ itemPerPage, totalItems, paginate, currentPage })
           }}
           href="#next"
         >
-          <span>Next</span>
+          <span>Siguiente</span>
           <Icon name="chevrons-right" />
         </PaginationLink>
       </PaginationItem>

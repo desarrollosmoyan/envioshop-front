@@ -116,6 +116,7 @@ import { FileManagerContextProvider } from "../pages/app/file-manager/FileManage
 import Pos from "../pages/pos/Pos";
 import FranchiseManagment from "../pages/user-managment/FranchiseManagment";
 import CashierManagment from "../pages/user-managment/CashierManagment";
+import ShipmentManagment from "../pages/shipment-managment/ShipmentManagment";
 
 const Pages = () => {
   useLayoutEffect(() => {
@@ -193,9 +194,9 @@ const Pages = () => {
         ></Route>
         <Route
           exact
-          path={`${process.env.PUBLIC_URL}/pos`}
-          component={Pos}
-        ></Route>
+          path={`${process.env.PUBLIC_URL}/shipments/managment`}
+          component={ShipmentManagment}
+        />
         {/*Pre-built Pages*/}
         <Route
           exact

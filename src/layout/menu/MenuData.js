@@ -670,9 +670,20 @@ const menu = [
   },
   {
     icon: "truck",
-    text: "POS",
-    link: "/pos",
-    newTab: true,
+    text: "Gestión de envios",
+    link: "/shipments",
+    subMenu: [
+      {
+        text: "POS",
+        icon: "sign-mxn",
+        link: "/shipments/pos",
+      },
+      {
+        text: "Envios",
+        icon: "building-fill",
+        link: "/shipments/managment",
+      },
+    ],
   },
   {
     icon: "setting-alt-fill",

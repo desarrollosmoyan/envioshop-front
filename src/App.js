@@ -94,7 +94,7 @@ const App = (props) => {
       ></Route>
 
       {/*Main Routes*/}
-      <PrivateRoute exact path="/pos" component={Pos}></PrivateRoute>
+      <PrivateRoute exact path="/shipments/pos" component={Pos}></PrivateRoute>
       <PrivateRoute
         exact
         path="/pos/checkout/:company"

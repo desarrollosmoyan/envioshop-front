@@ -166,7 +166,9 @@ const MenuItem = ({
     <li className={menuItemClass} onClick={(e) => toggleActionSidebar(e)}>
       {newTab ? (
         <Link
-          to={`${link !== "/pos" ? process.env.PUBLIC_URL + link : link}`}
+          to={`${
+            link !== "/shipments/pos" ? process.env.PUBLIC_URL + link : link
+          }`}
           rel="noopener noreferrer"
           className="nk-menu-link"
           target={link !== "pos" ? "" : "_blank"}
@@ -180,7 +182,9 @@ const MenuItem = ({
         </Link>
       ) : (
         <NavLink
-          to={`${link !== "/pos" ? process.env.PUBLIC_URL + link : link}`}
+          to={`${
+            link !== "/shipments/pos" ? process.env.PUBLIC_URL + link : link
+          }`}
           className={`nk-menu-link${sub ? " nk-menu-toggle" : ""}`}
           onClick={sub ? menuToggle : null}
           target={link !== "pos" ? "" : "_blank"}
@@ -225,7 +229,9 @@ const PanelItem = ({
     return (
       <li className={menuItemClass}>
         <Link
-          to={`${link !== "/pos" ? process.env.PUBLIC_URL : ""}${link}`}
+          to={`${
+            link !== "/shipments/pos" ? process.env.PUBLIC_URL : ""
+          }${link}`}
           className="nk-menu-link"
           onClick={() => setMenuData([menu[index]])}
         >

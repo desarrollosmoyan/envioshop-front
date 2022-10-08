@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownToggle,
@@ -31,27 +31,25 @@ import {
 import Content from "../../layout/content/Content";
 import Head from "../../layout/head/Head";
 import { filterStatus, userData } from "./UserData";
-import { findUpper } from "../../utils/Utils";
+import { findUpper, url } from "../../utils/Utils";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import axios from "axios";
+import useAxios from "../../hooks/useAxios";
 import { API_ENDPOINTS } from "../../constants";
+import { toast, ToastContainer } from "react-toastify";
 const FranchiseManagment = () => {
-  //const { contextData } = useContext(UserContext);
-  const [data, setData] = useState([]);
-  useEffect(() => {
-    getAllFranchises();
-  }, []);
-  const getAllFranchises = async () => {
-    try {
-      const response = await axios.get(
-        API_ENDPOINTS.users.franchises.allFranchises
-      );
-      setData(response.data.franchises);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const {
+    responseData: franchisesList,
+    isLoading: loadingFranchises,
+    setResponseData: setFranchisesList,
+    error,
+  } = useAxios({
+    url: API_ENDPOINTS.users.franchises.allFranchises,
+    isLazy: false,
+    initialData: [],
+    method: "GET",
+  });
   const [sm, updateSm] = useState(false);
   const [onSearchText] = useState("");
   const [modal, setModal] = useState({
@@ -76,7 +74,7 @@ const FranchiseManagment = () => {
       item.checked = false;
       return item;
     });
-    setData([...newData]);
+    setFranchisesList([...newData]);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Changing state value when searching name
@@ -88,18 +86,18 @@ const FranchiseManagment = () => {
           item.email.toLowerCase().includes(onSearchText.toLowerCase())
         );
       });
-      setData([...filteredObject]);
+      setFranchisesList([...filteredObject]);
     } else {
-      setData([]);
+      setFranchisesList([]);
     }
-  }, [onSearchText, setData]);
+  }, [onSearchText, setFranchisesList]);
 
   // function to change the selected property of an item
   const onSelectChange = (e, id) => {
-    let newData = data;
+    let newData = franchisesList;
     let index = newData.findIndex((item) => item.id === id);
     newData[index].checked = e.currentTarget.checked;
-    setData([...newData]);
+    setFranchisesList([...newData]);
   };
 
   // function to reset the form
@@ -112,6 +110,24 @@ const FranchiseManagment = () => {
       status: "Active",
     });
   };
+  // function to add a new franchise
+  const createNewFranchise = async (body) => {
+    const url = `${API_ENDPOINTS.baseUrl}${API_ENDPOINTS.users.franchises.createFranchise}`;
+    console.log(url);
+    try {
+      const { data } = await axios({
+        method: "POST",
+        url: url,
+        data: body,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      toast.success("Franquicia creada con éxito");
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
   // function to close the form modal
   const onFormCancel = () => {
@@ -121,20 +137,23 @@ const FranchiseManagment = () => {
 
   // submit function to add a new item
   const onFormSubmit = (submitData) => {
-    const { name, email, balance, cellphone, ubication } = submitData;
+    const { name, email, cellphone, ubication } = submitData;
     let submittedData = {
-      id: data.length + 1,
       name: name,
       email: email,
-      balance: balance,
+      password: "franquicia",
       cellphone: cellphone,
-      emailStatus: "success",
-      kycStatus: "alert",
-      lastLogin: "10 Feb 2020",
-      status: formData.status,
       ubication: ubication,
     };
-    setData([submittedData, ...data]);
+    createNewFranchise(submittedData)
+      .then((data) => {
+        console.log(data);
+        setFranchisesList([submittedData, ...franchisesList]);
+      })
+      .catch((error) => {
+        toast({ type: "error", message: "Algo salio mal" });
+      });
+
     resetForm();
     setModal({ edit: false }, { add: false });
   };
@@ -142,9 +161,8 @@ const FranchiseManagment = () => {
   // submit function to update a new item
   const onEditSubmit = (submitData) => {
     const { name, email, cellphone } = submitData;
-    console.log(name, email, cellphone);
     let submittedData;
-    let newitems = data;
+    let newitems = franchisesList;
     newitems.forEach((item, i) => {
       if (item.id === editId) {
         submittedData = {
@@ -164,14 +182,13 @@ const FranchiseManagment = () => {
 
   // function that loads the want to editted data
   const onEditClick = (id) => {
-    data.forEach((item) => {
+    franchisesList.forEach((item) => {
       if (item.id === id) {
         setFormData({
           name: item.name,
           email: item.email,
-          status: item.status,
           cellphone: item.cellphone,
-          balance: item.balance,
+          ubication: item.ubication,
         });
         setModal({ edit: true }, { add: false });
         setEditedId(id);
@@ -181,43 +198,54 @@ const FranchiseManagment = () => {
 
   // function to change to suspend property for an item
   const suspendUser = (id) => {
-    let newData = data;
+    let newData = franchisesList;
     let index = newData.findIndex((item) => item.id === id);
     newData[index].status = "Suspend";
-    setData([...newData]);
+    setFranchisesList([...newData]);
   };
 
   // function to change the check property of an item
   const selectorCheck = (e) => {
     let newData;
-    newData = data.map((item) => {
+    newData = franchisesList.map((item) => {
       item.checked = e.currentTarget.checked;
       return item;
     });
-    setData([...newData]);
+    setFranchisesList([...newData]);
   };
 
   // function to delete the seletected item
-  const selectorDeleteUser = () => {
+  const selectorDeleteUser = async () => {
     let newData;
-    newData = data.filter((item) => item.checked !== true);
-    setData([...newData]);
+    newData = franchisesList.filter((item) => item.checked !== true);
+    console.log(newData);
+    const { data } = await axios.delete(
+      `${API_ENDPOINTS.users.franchises.deleteFranchise}/${newData[0].id}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log(data);
+
+    setFranchisesList([...newData]);
   };
 
   // function to change the complete property of an item
   const selectorSuspendUser = () => {
     let newData;
-    newData = data.map((item) => {
+    newData = franchisesList.map((item) => {
       if (item.checked === true) item.status = "Suspend";
       return item;
     });
-    setData([...newData]);
+    setFranchisesList([...newData]);
   };
 
   // Get current list, pagination
   const indexOfLastItem = currentPage * itemPerPage;
   const indexOfFirstItem = indexOfLastItem - itemPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = franchisesList.slice(indexOfFirstItem, indexOfLastItem);
 
   // Change Page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -235,7 +263,7 @@ const FranchiseManagment = () => {
                 Franquicias
               </BlockTitle>
               <BlockDes className="text-soft">
-                <p>{`Actualmente hay ${data.length} franquicias.`}</p>
+                <p>{`Actualmente hay ${franchisesList.length} franquicias.`}</p>
               </BlockDes>
             </BlockHeadContent>
             <BlockHeadContent>
@@ -276,6 +304,7 @@ const FranchiseManagment = () => {
         </BlockHead>
 
         <Block>
+          <ToastContainer />
           <div className="nk-tb-list is-separate is-medium mb-3">
             <DataTableHead className="nk-tb-item">
               <DataTableRow className="nk-tb-col-check">
@@ -324,7 +353,7 @@ const FranchiseManagment = () => {
                           }}
                         >
                           <Icon name="na"></Icon>
-                          <span>Remove Selected</span>
+                          <span>Eliminar</span>
                         </DropdownItem>
                       </li>
                       <li>
@@ -422,7 +451,7 @@ const FranchiseManagment = () => {
                             id={"edit" + item.id}
                             icon="edit-alt-fill"
                             direction="top"
-                            text="Edit"
+                            text="Editar"
                           />
                         </li>
                         {item.status !== "Suspend" && (
@@ -495,7 +524,7 @@ const FranchiseManagment = () => {
             {currentItems.length > 0 ? (
               <PaginationComponent
                 itemPerPage={itemPerPage}
-                totalItems={data.length}
+                totalItems={franchisesList.length}
                 paginate={paginate}
                 currentPage={currentPage}
               />
@@ -570,13 +599,14 @@ const FranchiseManagment = () => {
                       )}
                     </FormGroup>
                   </Col>
-                  <Col md="6">
+                  <Col md="6" className="mt-2">
                     <FormGroup>
                       <label className="form-label">Teléfono</label>
                       <input
+                        placeholder="12345678"
                         className="form-control"
-                        type="number"
-                        name="phone"
+                        type="text"
+                        name="cellphone"
                         defaultValue={formData.cellphone}
                         ref={register({ required: "Este campo es requerido" })}
                       />
@@ -585,14 +615,30 @@ const FranchiseManagment = () => {
                       )}
                     </FormGroup>
                   </Col>
-                  <Col size="12">
+                  <Col md="6" className="mt-2">
+                    <FormGroup>
+                      <label className="form-label">Ubicación</label>
+                      <input
+                        className="form-control"
+                        type="text"
+                        placeholder="México"
+                        name="ubication"
+                        defaultValue={formData.ubication}
+                        ref={register({ required: "Este campo es requerido" })}
+                      />
+                      {errors.phone && (
+                        <span className="invalid">{errors.phone.message}</span>
+                      )}
+                    </FormGroup>
+                  </Col>
+                  <Col size="12" className="mt-2">
                     <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
                       <li>
                         <Button color="primary" size="md" type="submit">
-                          Crear usuario
+                          Crear franquicia
                         </Button>
                       </li>
-                      <li>
+                      <li className="ml-2">
                         <a
                           href="#cancel"
                           onClick={(ev) => {
@@ -601,7 +647,7 @@ const FranchiseManagment = () => {
                           }}
                           className="link link-light"
                         >
-                          Cancelar
+                          <Button color="danger">Cancelar</Button>
                         </a>
                       </li>
                     </ul>
@@ -630,7 +676,7 @@ const FranchiseManagment = () => {
               <Icon name="cross-sm"></Icon>
             </a>
             <div className="p-2">
-              <h5 className="title">Update User</h5>
+              <h5 className="title">Editar franquicia</h5>
               <div className="mt-4">
                 <Form
                   className="row gy-4"
@@ -638,7 +684,7 @@ const FranchiseManagment = () => {
                 >
                   <Col md="6">
                     <FormGroup>
-                      <label className="form-label">Name</label>
+                      <label className="form-label">Nombre</label>
                       <input
                         className="form-control"
                         type="text"
@@ -689,21 +735,20 @@ const FranchiseManagment = () => {
                       )}
                     </FormGroup>
                   </Col>
-                  <Col md="12" className="mb-2">
+                  <Col md="6" className="mb-2">
                     <FormGroup>
-                      <label className="form-label">Status</label>
-                      <div className="form-control-wrap">
-                        <RSelect
-                          options={filterStatus}
-                          defaultValue={{
-                            value: formData.status,
-                            label: formData.status,
-                          }}
-                          onChange={(e) =>
-                            setFormData({ ...formData, status: e.value })
-                          }
-                        />
-                      </div>
+                      <label className="form-label">Ubicación</label>
+                      <input
+                        className="form-control"
+                        type="text"
+                        defaultValue={formData.ubication}
+                        ref={register({ required: "Este campo es requerido" })}
+                      />
+                      {errors.ubication && (
+                        <span className="invalid">
+                          {errors.ubication.message}
+                        </span>
+                      )}
                     </FormGroup>
                   </Col>
                   <Col size="12">
@@ -722,7 +767,9 @@ const FranchiseManagment = () => {
                           }}
                           className="link link-light"
                         >
-                          Cancel
+                          <Button className="ml-2" color="danger">
+                            Cancelar
+                          </Button>
                         </a>
                       </li>
                     </ul>

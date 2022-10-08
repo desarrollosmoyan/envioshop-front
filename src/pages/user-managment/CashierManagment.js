@@ -38,15 +38,30 @@ import useAxios from "../../hooks/useAxios";
 import { API_ENDPOINTS } from "../../constants";
 
 const CashierManagment = () => {
-  const { responseData, isLoading, err } = useAxios({
+  //call useaxios hook
+  const {
+    responseData: cashiersList,
+    error,
+    isLoading: isCashiersLoading,
+    setResponseData: setCashiersList,
+  } = useAxios({
     url: API_ENDPOINTS.users.cashiers.allCashiers,
-    initialState: [],
+    method: "GET",
+    isLazy: false,
+    initialData: [],
   });
-  const [data, setData] = useState([]);
-  useEffect(() => {
-    if (!responseData) return;
-    setData(responseData.cashiers);
-  }, [responseData]);
+
+  const {
+    responseData: newCashier,
+    isLoading: isCashierLoading,
+    shootRequest,
+    dispatchBody: dispatchNewCashierBody,
+  } = useAxios({
+    url: API_ENDPOINTS.users.cashiers.createCashier,
+    isLazy: true,
+    method: "POST",
+    initialData: {},
+  });
   const [sm, updateSm] = useState(false);
   const [onSearchText] = useState("");
   const [modal, setModal] = useState({
@@ -71,7 +86,7 @@ const CashierManagment = () => {
       item.checked = false;
       return item;
     });
-    setData([...newData]);
+    setCashiersList([...newData]);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Changing state value when searching name
@@ -83,18 +98,18 @@ const CashierManagment = () => {
           item.email.toLowerCase().includes(onSearchText.toLowerCase())
         );
       });
-      setData([...filteredObject]);
+      setCashiersList([...filteredObject]);
     } else {
-      setData([]);
+      setCashiersList([]);
     }
-  }, [onSearchText, setData]);
+  }, [onSearchText, setCashiersList]);
 
   // function to change the selected property of an item
   const onSelectChange = (e, id) => {
-    let newData = data;
+    let newData = cashiersList;
     let index = newData.findIndex((item) => item.id === id);
     newData[index].checked = e.currentTarget.checked;
-    setData([...newData]);
+    setCashiersList([...newData]);
   };
 
   // function to reset the form
@@ -116,22 +131,14 @@ const CashierManagment = () => {
 
   // submit function to add a new item
   const onFormSubmit = (submitData) => {
-    const { name, email, balance, phone } = submitData;
+    const { name, email, password, franchiseId } = submitData;
     let submittedData = {
-      id: data.length + 1,
-      avatarBg: "purple",
       name: name,
-      role: "Customer",
       email: email,
-      balance: balance,
-      phone: phone,
-      emailStatus: "success",
-      kycStatus: "alert",
-      lastLogin: "10 Feb 2020",
-      status: formData.status,
-      country: "Bangladesh",
+      password: password,
+      franchiseId: franchiseId,
     };
-    setData([submittedData, ...data]);
+    setCashiersList([submittedData, ...cashiersList]);
     resetForm();
     setModal({ edit: false }, { add: false });
   };
@@ -140,7 +147,7 @@ const CashierManagment = () => {
   const onEditSubmit = (submitData) => {
     const { name, email } = submitData;
     let submittedData;
-    let newitems = data;
+    let newitems = cashiersList;
     newitems.forEach((item) => {
       if (item.id === editId) {
         submittedData = {
@@ -158,7 +165,7 @@ const CashierManagment = () => {
 
   // function that loads the want to editted data
   const onEditClick = (id) => {
-    data.forEach((item) => {
+    cashiersList.forEach((item) => {
       if (item.id === id) {
         setFormData({
           name: item.name,
@@ -175,43 +182,43 @@ const CashierManagment = () => {
 
   // function to change to suspend property for an item
   const suspendUser = (id) => {
-    let newData = data;
+    let newData = cashiersList;
     let index = newData.findIndex((item) => item.id === id);
     newData[index].status = "Suspend";
-    setData([...newData]);
+    setCashiersList([...newData]);
   };
 
   // function to change the check property of an item
   const selectorCheck = (e) => {
     let newData;
-    newData = data.map((item) => {
+    newData = cashiersList.map((item) => {
       item.checked = e.currentTarget.checked;
       return item;
     });
-    setData([...newData]);
+    setCashiersList([...newData]);
   };
 
   // function to delete the seletected item
   const selectorDeleteUser = () => {
     let newData;
-    newData = data.filter((item) => item.checked !== true);
-    setData([...newData]);
+    newData = cashiersList.filter((item) => item.checked !== true);
+    setCashiersList([...newData]);
   };
 
   // function to change the complete property of an item
   const selectorSuspendUser = () => {
     let newData;
-    newData = data.map((item) => {
+    newData = cashiersList.map((item) => {
       if (item.checked === true) item.status = "Suspend";
       return item;
     });
-    setData([...newData]);
+    setCashiersList([...newData]);
   };
 
   // Get current list, pagination
   const indexOfLastItem = currentPage * itemPerPage;
   const indexOfFirstItem = indexOfLastItem - itemPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = cashiersList.slice(indexOfFirstItem, indexOfLastItem);
 
   // Change Page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -229,7 +236,7 @@ const CashierManagment = () => {
                 Cajeros
               </BlockTitle>
               <BlockDes className="text-soft">
-                <p>{`Actualmente hay ${data.length} cajeros.`}</p>
+                <p>{`Actualmente hay ${cashiersList.length} cajeros.`}</p>
               </BlockDes>
             </BlockHeadContent>
             <BlockHeadContent>
@@ -455,7 +462,7 @@ const CashierManagment = () => {
             {currentItems.length > 0 ? (
               <PaginationComponent
                 itemPerPage={itemPerPage}
-                totalItems={data.length}
+                totalItems={cashiersList.length}
                 paginate={paginate}
                 currentPage={currentPage}
               />
@@ -485,7 +492,7 @@ const CashierManagment = () => {
               <Icon name="cross-sm"></Icon>
             </a>
             <div className="p-2">
-              <h5 className="title">Add User</h5>
+              <h5 className="title">Crear cajero</h5>
               <div className="mt-4">
                 <Form
                   className="row gy-4"
@@ -513,7 +520,7 @@ const CashierManagment = () => {
                       <label className="form-label">Email </label>
                       <input
                         className="form-control"
-                        type="text"
+                        type="email"
                         name="email"
                         defaultValue={formData.email}
                         placeholder="Enter email"
@@ -530,68 +537,30 @@ const CashierManagment = () => {
                       )}
                     </FormGroup>
                   </Col>
-                  <Col md="6">
+                  <Col md="12" className="mt-2">
                     <FormGroup>
-                      <label className="form-label">Tipo</label>
-                      <RSelect
-                        onChange={(e) => setRole(e.value)}
-                        id="role"
-                        name="role"
-                        placeholder="Seleccionar"
-                        defaultValue={{ value: "cashier", label: "Cajero" }}
-                        options={[
-                          { value: "franchise", label: "Franquicia" },
-                          { value: "cashier", label: "Cajero" },
-                        ]}
-                      />
-                      {errors.balance && (
-                        <span className="invalid">
-                          {errors.balance.message}
-                        </span>
-                      )}
+                      <label className="form-label">
+                        Seleccionar franquicia
+                      </label>
+                      <div className="form-control-wrap">
+                        <RSelect
+                          options={filterStatus}
+                          placeholder="Selecciona franquicia"
+                          onChange={(e) =>
+                            setFormData({ ...formData, status: e.value })
+                          }
+                        />
+                      </div>
                     </FormGroup>
                   </Col>
-                  <Col md="6">
-                    <FormGroup>
-                      <label className="form-label">Phone</label>
-                      <input
-                        className="form-control"
-                        type="number"
-                        name="phone"
-                        defaultValue={formData.phone}
-                        ref={register({ required: "This field is required" })}
-                      />
-                      {errors.phone && (
-                        <span className="invalid">{errors.phone.message}</span>
-                      )}
-                    </FormGroup>
-                  </Col>
-                  {role === "cashier" ? (
-                    <Col md="12">
-                      <FormGroup>
-                        <label className="form-label">Status</label>
-                        <div className="form-control-wrap">
-                          <RSelect
-                            options={filterStatus}
-                            placeholder="Selecciona franquicia"
-                            onChange={(e) =>
-                              setFormData({ ...formData, status: e.value })
-                            }
-                          />
-                        </div>
-                      </FormGroup>
-                    </Col>
-                  ) : (
-                    <></>
-                  )}
-                  <Col size="12">
+                  <Col size="12" className="mt-4">
                     <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
                       <li>
                         <Button color="primary" size="md" type="submit">
                           Crear usuario
                         </Button>
                       </li>
-                      <li>
+                      <li className="ml-4">
                         <a
                           href="#cancel"
                           onClick={(ev) => {
@@ -600,7 +569,7 @@ const CashierManagment = () => {
                           }}
                           className="link link-light"
                         >
-                          Cancelar
+                          <Button color="danger">Cancelar</Button>
                         </a>
                       </li>
                     </ul>

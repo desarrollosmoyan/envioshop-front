@@ -3,6 +3,7 @@ import FEDEXLOGO from "./assets/images/services/fedex.jpg";
 import UPSLOGO from "./assets/images/services/UPS.png";
 import ESTAFETALOGO from "./assets/images/services/estafeta.jpg";
 export const API_ENDPOINTS = {
+  baseUrl: "http://localhost:5000",
   auth: {
     signin: "/auth/signin",
     signup: "/auth/signup",
@@ -14,9 +15,12 @@ export const API_ENDPOINTS = {
     allUsers: (page = 0, offset = 0) => `/user?page=${page}&offset=${offset}`,
     franchises: {
       allFranchises: "/user/franchise",
+      createFranchise: "/user/franchise",
+      deleteFranchise: "/user/franchise",
     },
     cashiers: {
       allCashiers: "/user/cashier",
+      createCashier: "/user/cashier",
     },
   },
   services: {

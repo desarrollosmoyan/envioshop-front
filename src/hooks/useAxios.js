@@ -1,41 +1,61 @@
-import { useEffect, useState } from "react";
 import axios from "axios";
-const defaultOptions = {
-  method: "GET",
-  headers: {
-    "Content-Type": "application/json",
-  },
+import { useState, useEffect } from "react";
+
+const defaultHeaders = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*",
 };
+axios.defaults.baseURL = "http://localhost:5000";
 const useAxios = ({
-  url = "",
-  options = defaultOptions,
-  body = null,
-  initialState = null,
+  url,
+  method = "GET",
+  initialData = [],
+  body = undefined,
+  headers = defaultHeaders,
+  isLazy = false,
 }) => {
-  const [responseData, setResponseData] = useState(initialState);
-  const [isLoading, setLoading] = useState(true);
-  const [err, setError] = useState(null);
+  const [trigger, setTrigger] = useState(!isLazy);
+  const [responseData, setResponseData] = useState(initialData);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [bodyState, setBodyState] = useState(body);
+  const dispatchTrigger = () => {
+    setTrigger(!trigger);
+  };
+  const dispatchBody = (newBody) => {
+    setBodyState(newBody);
+  };
 
   useEffect(() => {
-    makeAxiosRequest();
-  }, []);
+    if (!trigger) return;
+    getData();
+    dispatchTrigger();
+  }, [trigger]);
 
-  const makeAxiosRequest = async () => {
+  const getData = async () => {
     try {
+      setIsLoading(true);
       const { data } = await axios({
-        ...options,
-        data: body,
+        method: method,
         url: url,
+        data: bodyState,
+        headers: headers,
       });
-      setLoading(false);
       setResponseData(data);
-    } catch (error) {
-      console.log(error);
-      setError(error);
-      setResponseData(initialState);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setIsLoading(false);
     }
   };
-  return { isLoading, responseData, err };
+  return {
+    responseData,
+    isLoading,
+    error,
+    setResponseData,
+    shootRequest: dispatchTrigger,
+    dispatchBody,
+  };
 };
 
 export default useAxios;
