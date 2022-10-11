@@ -36,6 +36,8 @@ import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import useAxios from "../../hooks/useAxios";
 import { API_ENDPOINTS } from "../../constants";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const CashierManagment = () => {
   //call useaxios hook
@@ -49,18 +51,6 @@ const CashierManagment = () => {
     method: "GET",
     isLazy: false,
     initialData: [],
-  });
-
-  const {
-    responseData: newCashier,
-    isLoading: isCashierLoading,
-    shootRequest,
-    dispatchBody: dispatchNewCashierBody,
-  } = useAxios({
-    url: API_ENDPOINTS.users.cashiers.createCashier,
-    isLazy: true,
-    method: "POST",
-    initialData: {},
   });
   const [sm, updateSm] = useState(false);
   const [onSearchText] = useState("");
@@ -129,6 +119,22 @@ const CashierManagment = () => {
     resetForm();
   };
 
+  //Create a new cashier
+
+  const createOneCashier = async (dataToSubmit) => {
+    try {
+      const { data } = await axios({
+        method: "POST",
+        data: dataToSubmit,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      toast("Cajero creado con éxito", { type: "success" });
+    } catch (error) {
+      toast("No se puede crear el cajero", { type: "error" });
+    }
+  };
   // submit function to add a new item
   const onFormSubmit = (submitData) => {
     const { name, email, password, franchiseId } = submitData;
@@ -138,7 +144,6 @@ const CashierManagment = () => {
       password: password,
       franchiseId: franchiseId,
     };
-    setCashiersList([submittedData, ...cashiersList]);
     resetForm();
     setModal({ edit: false }, { add: false });
   };
@@ -199,10 +204,24 @@ const CashierManagment = () => {
   };
 
   // function to delete the seletected item
-  const selectorDeleteUser = () => {
-    let newData;
-    newData = cashiersList.filter((item) => item.checked !== true);
-    setCashiersList([...newData]);
+  const selectorDeleteUser = async () => {
+    let newData = cashiersList.filter((item) => item.checked === true);
+    let restData = cashiersList.filter((item) => item.checked !== true);
+    try {
+      const { data } = await axios.delete(
+        `${API_ENDPOINTS.baseUrl}${API_ENDPOINTS.users.cashiers.deleteCashier}/${newData[0].id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      toast("Franquicia eliminada con éxito", { type: "success" });
+    } catch (error) {
+      toast(`${error.message}`, { type: "error" });
+    }
+
+    setFranchisesList([...restData]);
   };
 
   // function to change the complete property of an item

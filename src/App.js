@@ -20,8 +20,10 @@ import Success from "./pages/auth/Success";
 import InvoicePrint from "./pages/pre-built/invoice/InvoicePrint";
 import Pos from "./pages/pos/Pos";
 import Checkout from "./pages/pos/Checkout";
-
+import { useSelector } from "react-redux";
 const App = (props) => {
+  const user = useSelector((state) => state.user);
+  console.log(user);
   return (
     <Switch>
       {/* Auth Pages */}

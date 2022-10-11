@@ -13,11 +13,17 @@ import {
 } from "reactstrap";
 import { Button } from "../../components/Component";
 import Input from "../../components/input/input/Input";
+import axios from "axios";
+import { API_ENDPOINTS } from "../../constants";
 export default function PosModalForm() {
   const turn = useSelector((state) => state.user.turn);
   const { register, errors, handleSubmit } = useForm();
 
-  const onOpenTurn = () => {};
+  const onCreateTurn = () => {
+    try {
+      const url = `${API_ENDPOINTS.baseUrl}${API_ENDPOINTS.turns.create()}`;
+    } catch (error) {}
+  };
   return (
     <Modal isOpen={turn}>
       <ModalHeader>

@@ -21,6 +21,7 @@ export const API_ENDPOINTS = {
     cashiers: {
       allCashiers: "/user/cashier",
       createCashier: "/user/cashier",
+      deleteCashier: "/user/cashier",
     },
   },
   services: {

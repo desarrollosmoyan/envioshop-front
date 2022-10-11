@@ -71,6 +71,7 @@ export default function CheckoutPage2({ setPage, company }) {
           },
         },
       });
+      console.log(data);
       dispatch(setPdf({ data: data.shipment.documents[0].content }));
       toast.update(toastLoading, {
         render: "Envio creado con éxito",

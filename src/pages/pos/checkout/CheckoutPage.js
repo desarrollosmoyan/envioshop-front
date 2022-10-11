@@ -7,10 +7,13 @@ import { ErrorMessage } from "@hookform/error-message";
 import { useDispatch } from "react-redux";
 import { setShipping } from "../../../store/store";
 import { useSelector } from "react-redux";
+import { useState } from "react";
 import { useEffect } from "react";
+import ReactDatePicker from "react-datepicker";
 export default function CheckoutPage({ setPage }) {
   const dispatch = useDispatch();
   const { register, errors, handleSubmit, setValue } = useForm();
+  const [date, setDate] = useState(Date.now());
   const shipping = useSelector((state) => state.shipping.data);
   useEffect(() => {
     if (shipping) {
@@ -26,9 +29,11 @@ export default function CheckoutPage({ setPage }) {
       setValue("shipperAddress3", shipping.shipperAddress3);
       setValue("shipperCity", shipping.shipperCity);
       setValue("shipperCounty", shipping.shipperCounty);
+      setValue("plannedShippingDate", shipping.plannedShippingDate);
     }
   });
   const handleFirstPageSubmit = (formData) => {
+    console.log(formData);
     dispatch(
       setShipping({
         data: {
@@ -39,6 +44,9 @@ export default function CheckoutPage({ setPage }) {
       })
     );
     setPage(2);
+  };
+  const onChangeDate = (newDate) => {
+    setDate(newDate);
   };
   return (
     <Form onSubmit={handleSubmit(handleFirstPageSubmit)}>
@@ -96,7 +104,6 @@ export default function CheckoutPage({ setPage }) {
           <input
             type="text"
             id="shipperCountry"
-            value="México"
             ref={register({
               required: "Este campo no puede estar vacío",
             })}
@@ -224,6 +231,26 @@ export default function CheckoutPage({ setPage }) {
           <ErrorMessage
             errors={errors}
             name="shipperPostalCode"
+            render={({ message }) => <span className="invalid">{message}</span>}
+          />
+        </FormGroup>
+        <FormGroup className="col-3">
+          <label htmlFor="shipperCountry" className="form-label">
+            Cuando será enviado
+          </label>
+          <ReactDatePicker
+            id="plannedShippingDate"
+            name="plannedShippingDate"
+            selected={date}
+            className="form-control form-control-lg"
+            onChange={onChangeDate}
+            ref={register({
+              required: "Este campo no puede estar vacío",
+            })}
+          />
+          <ErrorMessage
+            errors={errors}
+            name="plannedShippingDate"
             render={({ message }) => <span className="invalid">{message}</span>}
           />
         </FormGroup>

@@ -33,14 +33,14 @@ const Login = () => {
     setLoading(true);
     try {
       const { data } = await axios.post(API_ENDPOINTS.auth.signin, formData);
-      const { name, email } = data.user;
+      const { name, email, type } = data.user;
       console.log(data);
       localStorage.setItem("accessToken", data.token);
       localStorage.setItem(
         "userData",
-        JSON.stringify({ name: name, email: email })
+        JSON.stringify({ name: name, email: email, type: type })
       );
-      dispatch(setUser({ name: name, email: email }));
+      dispatch(setUser({ name: name, email: email, type: type }));
       toast.success("Usuario logeado con éxito", {
         position: "bottom-center",
         autoClose: 2000,

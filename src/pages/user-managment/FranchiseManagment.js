@@ -66,11 +66,11 @@ const FranchiseManagment = () => {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemPerPage] = useState(10);
-
   // unselects the data on mount
   useEffect(() => {
+    if (franchisesList.length === 0) return;
     let newData;
-    newData = userData.map((item) => {
+    newData = franchisesList.map((item) => {
       item.checked = false;
       return item;
     });
@@ -96,6 +96,7 @@ const FranchiseManagment = () => {
   const onSelectChange = (e, id) => {
     let newData = franchisesList;
     let index = newData.findIndex((item) => item.id === id);
+    console.log(newData, id);
     newData[index].checked = e.currentTarget.checked;
     setFranchisesList([...newData]);
   };
@@ -211,25 +212,29 @@ const FranchiseManagment = () => {
       item.checked = e.currentTarget.checked;
       return item;
     });
+    console.log(newData);
     setFranchisesList([...newData]);
   };
 
   // function to delete the seletected item
   const selectorDeleteUser = async () => {
-    let newData;
-    newData = franchisesList.filter((item) => item.checked !== true);
-    console.log(newData);
-    const { data } = await axios.delete(
-      `${API_ENDPOINTS.users.franchises.deleteFranchise}/${newData[0].id}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    console.log(data);
+    let newData = franchisesList.filter((item) => item.checked === true);
+    let restData = franchisesList.filter((item) => item.checked !== true);
+    try {
+      const { data } = await axios.delete(
+        `${API_ENDPOINTS.baseUrl}${API_ENDPOINTS.users.franchises.deleteFranchise}/${newData[0].id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      toast("Franquicia eliminada con éxito", { type: "success" });
+    } catch (error) {
+      toast(`${error.message}`, { type: "error" });
+    }
 
-    setFranchisesList([...newData]);
+    setFranchisesList([...restData]);
   };
 
   // function to change the complete property of an item
@@ -251,7 +256,6 @@ const FranchiseManagment = () => {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const { errors, register, handleSubmit } = useForm();
-  const [role, setRole] = useState("cashier");
   return (
     <React.Fragment>
       <Head title="User List - Default"></Head>
@@ -425,19 +429,6 @@ const FranchiseManagment = () => {
                     </DataTableRow>
                     <DataTableRow size="lg">
                       <span>{0}</span>
-                    </DataTableRow>
-                    <DataTableRow size="md">
-                      <span
-                        className={`tb-status text-${
-                          item.status === "Active"
-                            ? "success"
-                            : item.status === "Pending"
-                            ? "warning"
-                            : "danger"
-                        }`}
-                      >
-                        {item.status}
-                      </span>
                     </DataTableRow>
                     <DataTableRow className="nk-tb-col-tools">
                       <ul className="nk-tb-actions gx-1">

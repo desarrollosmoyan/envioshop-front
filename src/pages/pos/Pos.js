@@ -39,7 +39,7 @@ export default function Pos() {
                 className="text-uppercase d-flex align-items-center"
               >
                 Cerrar turno
-                <em class="icon ni ni-cross-sm"></em>
+                <em className="icon ni ni-cross-sm"></em>
               </Button>
             </BlockHeadContent>
           </BlockBetween>
