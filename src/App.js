@@ -96,13 +96,24 @@ const App = (props) => {
       ></Route>
 
       {/*Main Routes*/}
-      <PrivateRoute exact path="/shipments/pos" component={Pos}></PrivateRoute>
       <PrivateRoute
+        roleTypeAllowed={["cashier", "admin"]}
+        exact
+        path="/shipments/pos"
+        component={Pos}
+      ></PrivateRoute>
+      <PrivateRoute
+        roleTypeAllowed={["cashier", "admin"]}
         exact
         path="/pos/checkout/:company"
         component={Checkout}
       ></PrivateRoute>
-      <PrivateRoute exact path="" component={Layout}></PrivateRoute>
+      <PrivateRoute
+        roleTypeAllowed={["cashier", "admin", "franchise"]}
+        exact
+        path=""
+        component={Layout}
+      ></PrivateRoute>
       <Route component={RedirectAs404}></Route>
     </Switch>
   );

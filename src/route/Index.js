@@ -113,10 +113,10 @@ import QuillPreview from "../pages/components/forms/rich-editor/QuillPreview";
 import TinymcePreview from "../pages/components/forms/rich-editor/TinymcePreview";
 import KnobPreview from "../pages/components/charts/KnobPreview";
 import { FileManagerContextProvider } from "../pages/app/file-manager/FileManagerContext";
-import Pos from "../pages/pos/Pos";
 import FranchiseManagment from "../pages/user-managment/FranchiseManagment";
 import CashierManagment from "../pages/user-managment/CashierManagment";
 import ShipmentManagment from "../pages/shipment-managment/ShipmentManagment";
+import PrivateRoute from "./PrivateRoute";
 
 const Pages = () => {
   useLayoutEffect(() => {
@@ -779,6 +779,19 @@ const Pages = () => {
             </UserContextProvider>
           )}
         ></Route>
+        <PrivateRoute
+          roleTypeAllowed={["admin", "franchise"]}
+          exact={true}
+          path={`${process.env.PUBLIC_URL}/users/cashiers`}
+          component={CashierManagment}
+        ></PrivateRoute>
+        <PrivateRoute
+          roleTypeAllowed={["admin"]}
+          exact={true}
+          path={`${process.env.PUBLIC_URL}/users/franchises`}
+          component={FranchiseManagment}
+        ></PrivateRoute>
+        {/*
         <Route
           exact
           path={`${process.env.PUBLIC_URL}/users/cashiers`}
@@ -788,15 +801,18 @@ const Pages = () => {
             </UserContextProvider>
           )}
         ></Route>
-        <Route
-          exact
-          path={`${process.env.PUBLIC_URL}/users/franchises`}
-          render={() => (
-            <UserContextProvider>
-              <FranchiseManagment />
-            </UserContextProvider>
-          )}
-        ></Route>
+          */}
+        {/*
+            <Route
+              exact
+              path={`${process.env.PUBLIC_URL}/users/franchises`}
+              render={() => (
+                <UserContextProvider>
+                  <FranchiseManagment />
+                </UserContextProvider>
+              )}
+            ></Route>
+            */}
         <Route component={RedirectAs404}></Route>
       </Switch>
     </Suspense>

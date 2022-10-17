@@ -1,7 +1,9 @@
-import DHLLOGO from "./assets/images/services/DHL.png";
-import FEDEXLOGO from "./assets/images/services/fedex.jpg";
+import DHLLOGO from "./assets/images/services/dhl.svg";
+import FEDEXLOGO from "./assets/images/services/fedex.svg";
 import UPSLOGO from "./assets/images/services/UPS.png";
-import ESTAFETALOGO from "./assets/images/services/estafeta.jpg";
+import ESTAFETALOGO from "./assets/images/services/estafeta.svg";
+import PAQUETEEXPRESSLOGO from "./assets/images/services/paquetexpress.svg";
+import REDPACKLOGO from "./assets/images/services/redpack.svg";
 export const API_ENDPOINTS = {
   baseUrl: "http://localhost:5000",
   auth: {
@@ -17,6 +19,7 @@ export const API_ENDPOINTS = {
       allFranchises: "/user/franchise",
       createFranchise: "/user/franchise",
       deleteFranchise: "/user/franchise",
+      updateFranchise: (id = "") => `/user/franchise/${id}`,
     },
     cashiers: {
       allCashiers: "/user/cashier",
@@ -243,5 +246,7 @@ export const companyLogos = {
   DHL: DHLLOGO,
   FEDEX: FEDEXLOGO,
   UPS: UPSLOGO,
+  REDPACK: REDPACKLOGO,
   ESTAFETA: ESTAFETALOGO,
+  PAQUETEEXPRESS: PAQUETEEXPRESSLOGO,
 };

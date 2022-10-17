@@ -58,27 +58,31 @@ export default function CheckoutPage2({ setPage, company }) {
         type: "info",
         position: "bottom-right",
       });
-      const { data } = await axios({
-        method: "POST",
-        url: url,
-        data: {
-          ...shipping,
-          packageSize: {
-            width: 10,
-            height: 10,
-            length: 10,
-            weight: 1,
+      try {
+        const { data } = await axios({
+          method: "POST",
+          url: url,
+          data: {
+            ...shipping,
+            packageSize: {
+              width: 10,
+              height: 10,
+              length: 10,
+              weight: 1,
+            },
           },
-        },
-      });
-      console.log(data);
-      dispatch(setPdf({ data: data.shipment.documents[0].content }));
-      toast.update(toastLoading, {
-        render: "Envio creado con éxito",
-        type: "success",
-        isLoading: false,
-        closeOnClick: true,
-      });
+        });
+        console.log(data);
+        dispatch(setPdf({ data: data.shipment.documents[0].content }));
+        toast.update(toastLoading, {
+          render: "Envio creado con éxito",
+          type: "success",
+          isLoading: false,
+          closeOnClick: true,
+        });
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 

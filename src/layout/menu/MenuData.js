@@ -644,21 +644,25 @@ const menu = [
     text: "Tablero",
     link: "/",
     newTab: false,
+    role: ["admin"],
   },
   {
     icon: "user-list-fill",
     text: "Usuarios",
     link: "/users",
+    role: ["admin", "franchise"],
     subMenu: [
       {
         text: "Franquicias",
         icon: "building-fill",
         link: "/users/franchises",
+        role: ["admin"],
       },
       {
         text: "Cajeros",
         icon: "user-alt-fill",
         link: "/users/cashiers",
+        role: ["admin", "franchise"],
       },
     ],
     newTab: false,
@@ -672,6 +676,7 @@ const menu = [
     icon: "truck",
     text: "Gestión de envios",
     link: "/shipments",
+    role: ["admin", "cashier"],
     subMenu: [
       {
         text: "POS",

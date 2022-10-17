@@ -10,6 +10,7 @@ import {
   BlockHeadContent,
   BlockTitle,
 } from "../../components/Component";
+import { Page, Text, View, Document, Link } from "@react-pdf/renderer";
 import Content from "../../layout/content/Content";
 
 export default function Checkout() {
@@ -18,9 +19,9 @@ export default function Checkout() {
   console.log(pdf);
   const [page, setPage] = useState(1);
   return (
-    <>
+    <div className="vh-100">
       <Head title="Checkout" />
-      <Content>
+      <Content className="h-100">
         <BlockHead size="sm" className="mb-0">
           <BlockBetween>
             <BlockHeadContent>
@@ -30,7 +31,7 @@ export default function Checkout() {
             </BlockHeadContent>
           </BlockBetween>
         </BlockHead>
-        <div className="p-3 d-flex align-items-center">
+        <div className="p-3 d-flex align-items-center h-100">
           <div className="w-50">
             <div
               className="d-flex border rounded-sm mb-2"
@@ -61,18 +62,21 @@ export default function Checkout() {
               <CheckoutPage2 setPage={setPage} company={service.company} />
             ) : null}
           </div>
-          <div className=" ml-2 w-50 align-self-center text-center h-100">
+          <div className="ml-2 w-50 d-block h-100 ">
             {pdf ? (
-              <embed
-                src={`data:application/pdf;base64,${pdf}`}
-                className="w-100 h-100 "
-              />
+              <>
+                <iframe
+                  title="pepe"
+                  className="w-100"
+                  src={`data:application/pdf;base64,${pdf}`}
+                ></iframe>
+              </>
             ) : (
               <h5>Acá se mostrará el PDF</h5>
             )}
           </div>
         </div>
       </Content>
-    </>
+    </div>
   );
 }

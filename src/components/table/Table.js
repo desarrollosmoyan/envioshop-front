@@ -1,11 +1,7 @@
 import React from "react";
 import { basicData } from "./TableData";
 import classNames from "classnames";
-import DHLLOGO from "../../assets/images/services/DHL.png";
-import FEDEXLOGO from "../../assets/images/services/fedex.jpg";
-import UPSLOGO from "../../assets/images/services/UPS.png";
-import ESTAFETALOGO from "../../assets/images/services/estafeta.jpg";
-import PAQUETEEXPRESSLOGO from "../../assets/images/services/PAQUETE EXPRESS.png";
+import { companyLogos } from "../../constants";
 import { Link } from "react-router-dom";
 import { FormGroup } from "reactstrap";
 import { Button } from "../Component";
@@ -35,11 +31,11 @@ const Table = ({
     "table-hover": hover,
   });
   const companyImgs = {
-    DHL: DHLLOGO,
-    FEDEX: FEDEXLOGO,
-    UPS: UPSLOGO,
-    ESTAFETA: ESTAFETALOGO,
-    "PAQUETE EXPRESS": PAQUETEEXPRESSLOGO,
+    DHL: companyLogos.DHL,
+    FEDEX: companyLogos.FEDEX,
+    UPS: companyLogos.UPS,
+    ESTAFETA: companyLogos.ESTAFETA,
+    "PAQUETE EXPRESS": companyLogos.PAQUETEEXPRESS,
   };
   return (
     <div className={`${responsive ? "table-responsive" : ""} h-100`}>

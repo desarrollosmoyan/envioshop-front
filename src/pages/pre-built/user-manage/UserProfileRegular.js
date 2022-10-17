@@ -17,8 +17,9 @@ import {
 } from "../../../components/Component";
 import { countryOptions, userData } from "./UserData";
 import { getDateStructured } from "../../../utils/Utils";
-
+import { useSelector } from "react-redux";
 const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
+  const user = useSelector((state) => state.user);
   const [modalTab, setModalTab] = useState("1");
   const [userInfo, setUserInfo] = useState(userData[0]);
   const [formData, setFormData] = useState({
@@ -55,14 +56,16 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
       <BlockHead size="lg">
         <BlockBetween>
           <BlockHeadContent>
-            <BlockTitle tag="h4">Personal Information</BlockTitle>
+            <BlockTitle tag="h4">Información personal</BlockTitle>
             <BlockDes>
-              <p>Basic info, like your name and address, that you use on Nio Platform.</p>
+              <p>Información básica, como nombre, ubicación</p>
             </BlockDes>
           </BlockHeadContent>
           <BlockHeadContent className="align-self-start d-lg-none">
             <Button
-              className={`toggle btn btn-icon btn-trigger mt-n1 ${sm ? "active" : ""}`}
+              className={`toggle btn btn-icon btn-trigger mt-n1 ${
+                sm ? "active" : ""
+              }`}
               onClick={() => updateSm(!sm)}
             >
               <Icon name="menu-alt-r"></Icon>
@@ -74,12 +77,12 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
       <Block>
         <div className="nk-data data-list">
           <div className="data-head">
-            <h6 className="overline-title">Basics</h6>
+            <h6 className="overline-title">Información Básica</h6>
           </div>
           <div className="data-item" onClick={() => setModal(true)}>
             <div className="data-col">
-              <span className="data-label">Full Name</span>
-              <span className="data-value">{userInfo.name}</span>
+              <span className="data-label">Nombre completo</span>
+              <span className="data-value">{user.name}</span>
             </div>
             <div className="data-col data-col-end">
               <span className="data-more">
@@ -89,7 +92,7 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
           </div>
           <div className="data-item" onClick={() => setModal(true)}>
             <div className="data-col">
-              <span className="data-label">Display Name</span>
+              <span className="data-label">Rol</span>
               <span className="data-value">{userInfo.displayName}</span>
             </div>
             <div className="data-col data-col-end">
@@ -109,9 +112,22 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
               </span>
             </div>
           </div>
+          {user.type === "cashier" ? (
+            <div className="data-item" onClick={() => setModal(true)}>
+              <div className="data-col">
+                <span className="data-label">Franquicia</span>
+                <span className="data-value text-soft">{userInfo.phone}</span>
+              </div>
+              <div className="data-col data-col-end">
+                <span className="data-more">
+                  <Icon name="forward-ios"></Icon>
+                </span>
+              </div>
+            </div>
+          ) : null}
           <div className="data-item" onClick={() => setModal(true)}>
             <div className="data-col">
-              <span className="data-label">Phone Number</span>
+              <span className="data-label">Número de teléfono</span>
               <span className="data-value text-soft">{userInfo.phone}</span>
             </div>
             <div className="data-col data-col-end">
@@ -122,18 +138,7 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
           </div>
           <div className="data-item" onClick={() => setModal(true)}>
             <div className="data-col">
-              <span className="data-label">Date of Birth</span>
-              <span className="data-value">{userInfo.dob}</span>
-            </div>
-            <div className="data-col data-col-end">
-              <span className="data-more">
-                <Icon name="forward-ios"></Icon>
-              </span>
-            </div>
-          </div>
-          <div className="data-item" onClick={() => setModal(true)}>
-            <div className="data-col">
-              <span className="data-label">Address</span>
+              <span className="data-label">Ubicación</span>
               <span className="data-value">
                 {userInfo.address},
                 <br />
@@ -147,65 +152,14 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
             </div>
           </div>
         </div>
-        <div className="nk-data data-list">
-          <div className="data-head">
-            <h6 className="overline-title">Preferences</h6>
-          </div>
-          <div className="data-item">
-            <div className="data-col">
-              <span className="data-label">Language</span>
-              <span className="data-value">English (United State)</span>
-            </div>
-            <div className="data-col data-col-end">
-              <a
-                href="#language"
-                onClick={(ev) => {
-                  ev.preventDefault();
-                }}
-                className="link link-primary"
-              >
-                Change Language
-              </a>
-            </div>
-          </div>
-          <div className="data-item">
-            <div className="data-col">
-              <span className="data-label">Date Format</span>
-              <span className="data-value">MM/DD/YYYY</span>
-            </div>
-            <div className="data-col data-col-end">
-              <a
-                href="#link"
-                onClick={(ev) => {
-                  ev.preventDefault();
-                }}
-                className="link link-primary"
-              >
-                Change
-              </a>
-            </div>
-          </div>
-          <div className="data-item">
-            <div className="data-col">
-              <span className="data-label">Timezone</span>
-              <span className="data-value">Bangladesh (GMT +6)</span>
-            </div>
-            <div className="data-col data-col-end">
-              <a
-                href="#link"
-                onClick={(ev) => {
-                  ev.preventDefault();
-                }}
-                className="link link-primary"
-              >
-                Change
-              </a>
-            </div>
-          </div>
-        </div>
       </Block>
 
-      <Modal isOpen={modal} className="modal-dialog-centered" size="lg" toggle={() => setModal(false)}>
+      <Modal
+        isOpen={modal}
+        className="modal-dialog-centered"
+        size="lg"
+        toggle={() => setModal(false)}
+      >
         <ModalBody>
           <a
             href="#dropdownitem"
@@ -246,7 +200,10 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
               </li>
             </ul>
             <div className="tab-content">
-              <div className={`tab-pane ${modalTab === "1" ? "active" : ""}`} id="personal">
+              <div
+                className={`tab-pane ${modalTab === "1" ? "active" : ""}`}
+                id="personal"
+              >
                 <Row className="gy-4">
                   <Col md="6">
                     <FormGroup>
@@ -304,15 +261,27 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
                       <DatePicker
                         selected={new Date(formData.dob)}
                         className="form-control"
-                        onChange={(date) => setFormData({ ...formData, dob: getDateStructured(date) })}
+                        onChange={(date) =>
+                          setFormData({
+                            ...formData,
+                            dob: getDateStructured(date),
+                          })
+                        }
                         maxDate={new Date()}
                       />
                     </FormGroup>
                   </Col>
                   <Col size="12">
                     <div className="custom-control custom-switch">
-                      <input type="checkbox" className="custom-control-input form-control" id="latest-sale" />
-                      <label className="custom-control-label" htmlFor="latest-sale">
+                      <input
+                        type="checkbox"
+                        className="custom-control-input form-control"
+                        id="latest-sale"
+                      />
+                      <label
+                        className="custom-control-label"
+                        htmlFor="latest-sale"
+                      >
                         Use full name to display{" "}
                       </label>
                     </div>
@@ -347,7 +316,10 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
                   </Col>
                 </Row>
               </div>
-              <div className={`tab-pane ${modalTab === "2" ? "active" : ""}`} id="address">
+              <div
+                className={`tab-pane ${modalTab === "2" ? "active" : ""}`}
+                id="address"
+              >
                 <Row className="gy-4">
                   <Col md="6">
                     <FormGroup>
@@ -408,14 +380,20 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
                             label: formData.country,
                           },
                         ]}
-                        onChange={(e) => setFormData({ ...formData, country: e.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, country: e.value })
+                        }
                       />
                     </FormGroup>
                   </Col>
                   <Col size="12">
                     <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
                       <li>
-                        <Button color="primary" size="lg" onClick={() => submitForm()}>
+                        <Button
+                          color="primary"
+                          size="lg"
+                          onClick={() => submitForm()}
+                        >
                           Update Address
                         </Button>
                       </li>

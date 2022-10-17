@@ -37,21 +37,18 @@ import { useForm } from "react-hook-form";
 import useAxios from "../../hooks/useAxios";
 import { API_ENDPOINTS } from "../../constants";
 import axios from "axios";
-import { toast } from "react-toastify";
-
+import { toast, ToastContainer } from "react-toastify";
+import useUser from "../../hooks/useUser";
 const CashierManagment = () => {
-  //call useaxios hook
-  const {
-    responseData: cashiersList,
-    error,
-    isLoading: isCashiersLoading,
-    setResponseData: setCashiersList,
-  } = useAxios({
-    url: API_ENDPOINTS.users.cashiers.allCashiers,
-    method: "GET",
-    isLazy: false,
-    initialData: [],
-  });
+  const { getAll, create, deleteOne, updateOne } = useUser("cashier");
+  const { getAll: getAllFranchises } = useUser("franchise");
+  const [cashiersList, setCashiersList] = useState([]);
+  const [franchiseList, setFranchisesList] = useState([]);
+  useEffect(() => {
+    getAll(setCashiersList);
+    getAllFranchises(setFranchisesList);
+  }, []);
+  console.log(franchiseList);
   const [sm, updateSm] = useState(false);
   const [onSearchText] = useState("");
   const [modal, setModal] = useState({
@@ -62,9 +59,7 @@ const CashierManagment = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    balance: "",
     phone: "",
-    status: "Active",
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemPerPage] = useState(10);
@@ -107,7 +102,6 @@ const CashierManagment = () => {
     setFormData({
       name: "",
       email: "",
-      balance: "",
       phone: "",
       status: "Active",
     });
@@ -144,6 +138,9 @@ const CashierManagment = () => {
       password: password,
       franchiseId: franchiseId,
     };
+    create(submittedData)
+      .then(() => toast("Cajero creado con éxito", { type: "success" }))
+      .catch(() => toast("Algo salió mal!", { type: "error" }));
     resetForm();
     setModal({ edit: false }, { add: false });
   };
@@ -162,6 +159,11 @@ const CashierManagment = () => {
         };
       }
     });
+    updateOne(editId, submittedData)
+      .then(() => toast(`Cajero editado con éxito`, { type: "success" }))
+      .catch(() => {
+        toast("Algo salio mal!", { type: "error" });
+      });
     let index = newitems.findIndex((item) => item.id === editId);
     newitems[index] = submittedData;
     setModal({ edit: false });
@@ -177,7 +179,6 @@ const CashierManagment = () => {
           email: item.email,
           status: item.status,
           phone: item.phone,
-          balance: item.balance,
         });
         setModal({ edit: true }, { add: false });
         setEditedId(id);
@@ -221,7 +222,7 @@ const CashierManagment = () => {
       toast(`${error.message}`, { type: "error" });
     }
 
-    setFranchisesList([...restData]);
+    setCashiersList([...restData]);
   };
 
   // function to change the complete property of an item
@@ -296,6 +297,7 @@ const CashierManagment = () => {
         </BlockHead>
 
         <Block>
+          <ToastContainer />
           <div className="nk-tb-list is-separate is-medium mb-3">
             <DataTableHead className="nk-tb-item">
               <DataTableRow className="nk-tb-col-check">
@@ -563,7 +565,10 @@ const CashierManagment = () => {
                       </label>
                       <div className="form-control-wrap">
                         <RSelect
-                          options={filterStatus}
+                          options={franchiseList.map((item) => ({
+                            label: item.name,
+                            value: item.id,
+                          }))}
                           placeholder="Selecciona franquicia"
                           onChange={(e) =>
                             setFormData({ ...formData, status: e.value })
@@ -658,27 +663,6 @@ const CashierManagment = () => {
                       />
                       {errors.email && (
                         <span className="invalid">{errors.email.message}</span>
-                      )}
-                    </FormGroup>
-                  </Col>
-                  <Col md="6">
-                    <FormGroup>
-                      <label className="form-label">Ordered</label>
-                      <input
-                        className="form-control"
-                        type="number"
-                        name="balance"
-                        disabled
-                        defaultValue={parseFloat(
-                          formData.balance.replace(/,/g, "")
-                        )}
-                        placeholder="Ordered"
-                        ref={register({ required: "This field is required" })}
-                      />
-                      {errors.balance && (
-                        <span className="invalid">
-                          {errors.balance.message}
-                        </span>
                       )}
                     </FormGroup>
                   </Col>

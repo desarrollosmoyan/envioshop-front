@@ -25,31 +25,25 @@ import {
   DataTableRow,
   DataTableItem,
   TooltipComponent,
-  RSelect,
   PreviewAltCard,
 } from "../../components/Component";
 import Content from "../../layout/content/Content";
 import Head from "../../layout/head/Head";
-import { filterStatus, userData } from "./UserData";
-import { findUpper, url } from "../../utils/Utils";
+import { userData } from "./UserData";
+import { findUpper } from "../../utils/Utils";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import useAxios from "../../hooks/useAxios";
 import { API_ENDPOINTS } from "../../constants";
 import { toast, ToastContainer } from "react-toastify";
+import useUser from "../../hooks/useUser";
 const FranchiseManagment = () => {
-  const {
-    responseData: franchisesList,
-    isLoading: loadingFranchises,
-    setResponseData: setFranchisesList,
-    error,
-  } = useAxios({
-    url: API_ENDPOINTS.users.franchises.allFranchises,
-    isLazy: false,
-    initialData: [],
-    method: "GET",
-  });
+  const { getAll, create, deleteOne, updateOne } = useUser("franchise");
+  const [franchisesList, setFranchisesList] = useState([]);
+  useEffect(() => {
+    getAll(setFranchisesList);
+  }, []);
   const [sm, updateSm] = useState(false);
   const [onSearchText] = useState("");
   const [modal, setModal] = useState({
@@ -146,6 +140,12 @@ const FranchiseManagment = () => {
       cellphone: cellphone,
       ubication: ubication,
     };
+    create(submittedData)
+      .then(() => {
+        toast("Franquicia creada con éxito", { type: "success" });
+      })
+      .catch(() => toast({ type: "error", message: "Algo salio mal" }));
+    /* 
     createNewFranchise(submittedData)
       .then((data) => {
         console.log(data);
@@ -154,7 +154,7 @@ const FranchiseManagment = () => {
       .catch((error) => {
         toast({ type: "error", message: "Algo salio mal" });
       });
-
+    */
     resetForm();
     setModal({ edit: false }, { add: false });
   };
@@ -164,10 +164,10 @@ const FranchiseManagment = () => {
     const { name, email, cellphone } = submitData;
     let submittedData;
     let newitems = franchisesList;
+    console.log(editId);
     newitems.forEach((item, i) => {
       if (item.id === editId) {
         submittedData = {
-          id: i,
           name: name,
           email: email,
           cellphone: "+52" + cellphone,
@@ -175,6 +175,8 @@ const FranchiseManagment = () => {
         };
       }
     });
+    console.log(submittedData);
+    updateOne(editId, submittedData);
     let index = newitems.findIndex((item) => item.id === editId);
     newitems[index] = submittedData;
     setModal({ edit: false });
@@ -220,20 +222,9 @@ const FranchiseManagment = () => {
   const selectorDeleteUser = async () => {
     let newData = franchisesList.filter((item) => item.checked === true);
     let restData = franchisesList.filter((item) => item.checked !== true);
-    try {
-      const { data } = await axios.delete(
-        `${API_ENDPOINTS.baseUrl}${API_ENDPOINTS.users.franchises.deleteFranchise}/${newData[0].id}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      toast("Franquicia eliminada con éxito", { type: "success" });
-    } catch (error) {
-      toast(`${error.message}`, { type: "error" });
-    }
-
+    deleteOne(newData[0].id)
+      .then(() => toast("Franquicia eliminada con éxito", { type: "success" }))
+      .catch((error) => toast("Algo ha salido mal!", { type: "error" }));
     setFranchisesList([...restData]);
   };
 
@@ -400,7 +391,12 @@ const FranchiseManagment = () => {
                     </DataTableRow>
                     <DataTableRow>
                       <Link
-                        to={`${process.env.PUBLIC_URL}/user-details-regular/${item.id}`}
+                        to={{
+                          pathname: `${process.env.PUBLIC_URL}/user-details-regular/${item.id}`,
+                          state: {
+                            type: "franchise",
+                          },
+                        }}
                       >
                         <div className="user-card">
                           <UserAvatar

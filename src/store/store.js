@@ -6,11 +6,13 @@ const userSlice = createSlice({
     name: "",
     email: "",
     turn: null,
+    type: "",
   },
   reducers: {
     setUser: (state, action) => {
       state.name = action.payload.name;
       state.email = action.payload.email;
+      state.type = action.payload.type;
     },
     setTurn: (state, action) => {
       state.turn = action.payload.turn;
