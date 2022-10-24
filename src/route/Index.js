@@ -167,7 +167,7 @@ const Pages = () => {
         ></Route>
         <Route
           exact
-          path={`${process.env.PUBLIC_URL}/ecommerce/settings`}
+          path={`${process.env.PUBLIC_URL}/settings`}
           component={EcomSettings}
         ></Route>
         <Route

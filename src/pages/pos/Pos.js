@@ -5,26 +5,135 @@ import {
   BlockHeadContent,
   BlockTitle,
   Button,
+  Icon,
   Table,
 } from "../../components/Component";
 import Head from "../../layout/head/Head";
 import Content from "../../layout/content/Content";
 import { useSelector } from "react-redux";
 import PosForm from "./PosForm";
-import { Row, Col, Container } from "reactstrap";
+import {
+  Row,
+  Col,
+  Container,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "reactstrap";
 import PosModalForm from "./PosModalForm";
 import { companyLogos } from "../../constants";
 import { useHistory } from "react-router";
-
+import useTurn from "../../hooks/useTurn";
+import useUser from "../../hooks/useUser";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 export default function Pos() {
+  const { end } = useTurn();
+  const { getOne } = useUser("cashier");
+  const [cashier, setCashier] = useState({});
+  const [closeTurnModal, setCloseTurnModal] = useState(false);
+  const cashierId = JSON.parse(localStorage.getItem("userData")).id;
   const rating = useSelector((state) => state.rating);
   const history = useHistory();
-
-  console.log(rating);
+  useEffect(() => {
+    getOne(cashierId, setCashier);
+  }, []);
+  const onCloseTurn = () => {
+    end(cashier.Turn.id)
+      .then(() => toast("Turno terminado con éxito", { type: "success" }))
+      .catch(() => toast("No se puede cerrar el turno", { type: "error" }));
+    setCloseTurnModal(false);
+  };
+  console.log(rating.data);
   return (
     <Container className="min-vh-100">
       <Head title="POS" />
       <PosModalForm />
+      <Modal isOpen={closeTurnModal}>
+        <ModalHeader>¿Estas seguro que quieres cerrar el turno?</ModalHeader>
+        <ModalBody>
+          <Row>
+            <Col md={6} className="d-flex flex-column border-right">
+              <span>El turno empezó con:</span>
+              <Row>
+                <Col className="d-flex flex-column">
+                  <span>Monedas</span>
+                  {cashier.Turn
+                    ? Object.keys(cashier.Turn.openBalance.coins).map(
+                        (value) => (
+                          <span>
+                            {`${value.replace("coin", "")}: ${
+                              cashier.Turn.openBalance.coins[value]
+                            }`}
+                          </span>
+                        )
+                      )
+                    : null}
+                </Col>
+                <Col className="d-flex flex-column">
+                  <span>Billetes</span>
+                  {cashier.Turn
+                    ? Object.keys(cashier.Turn.openBalance.bills).map(
+                        (value) => (
+                          <span>
+                            {`${value.replace("bill", "")}: ${
+                              cashier.Turn.openBalance.bills[value]
+                            }`}
+                          </span>
+                        )
+                      )
+                    : null}
+                </Col>
+              </Row>
+            </Col>
+            <Col md={6}>
+              <span>El turno terminará con:</span>
+              <Row>
+                <Col className="d-flex flex-column">
+                  <span>Monedas</span>
+                  {cashier.Turn
+                    ? Object.keys(cashier.Turn.closeBalance.coins).map(
+                        (value) => (
+                          <span>
+                            {`${value.replace("coin", "")}: ${
+                              cashier.Turn.closeBalance.coins[value]
+                            }`}
+                          </span>
+                        )
+                      )
+                    : null}
+                </Col>
+                <Col className="d-flex flex-column">
+                  <span>Billetes</span>
+                  {cashier.Turn
+                    ? Object.keys(cashier.Turn.closeBalance.bills).map(
+                        (value) => (
+                          <span>
+                            {`${value.replace("bill", "")}: ${
+                              cashier.Turn.closeBalance.bills[value]
+                            }`}
+                          </span>
+                        )
+                      )
+                    : null}
+                </Col>
+              </Row>
+            </Col>
+          </Row>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="danger" onClick={onCloseTurn}>
+            Confirmar cierre
+          </Button>
+          <Button
+            color="gray"
+            onClick={() => setCloseTurnModal(!closeTurnModal)}
+          >
+            Cerrar <Icon name="cross" className="ml-2" />
+          </Button>
+        </ModalFooter>
+      </Modal>
       <Content>
         <BlockHead size="sm" className="mb-0">
           <BlockBetween>
@@ -36,6 +145,7 @@ export default function Pos() {
             <BlockHeadContent>
               <Button
                 color="danger"
+                onClick={() => setCloseTurnModal(true)}
                 className="text-uppercase d-flex align-items-center"
               >
                 Cerrar turno
@@ -57,7 +167,10 @@ export default function Pos() {
                   <>
                     <Row
                       className="border"
-                      style={{ height: "40%", overflowX: "hidden" }}
+                      style={{
+                        height: "50vh",
+                        overflowX: "hidden",
+                      }}
                     >
                       <Table
                         responsive
@@ -69,7 +182,7 @@ export default function Pos() {
                     </Row>
                     <Row className="border mt-2">
                       <Col className="p-0">
-                        {rating.selected ? (
+                        {rating.selected && rating.selected.prices ? (
                           <div className="d-flex border rounded w-50 align-items-center">
                             <img
                               style={{ width: "3rem" }}

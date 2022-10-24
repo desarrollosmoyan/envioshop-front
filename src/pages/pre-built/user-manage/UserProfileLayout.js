@@ -116,35 +116,7 @@ const UserProfileLayout = () => {
                         }
                       >
                         <Icon name="user-fill-c"></Icon>
-                        <span>Personal Information</span>
-                      </Link>
-                    </li>
-                    <li onClick={() => updateSm(false)}>
-                      <Link
-                        to={`${process.env.PUBLIC_URL}/user-profile-notification`}
-                        className={
-                          window.location.pathname ===
-                          `${process.env.PUBLIC_URL}/user-profile-notification`
-                            ? "active"
-                            : ""
-                        }
-                      >
-                        <Icon name="bell-fill"></Icon>
-                        <span>Notification</span>
-                      </Link>
-                    </li>
-                    <li onClick={() => updateSm(false)}>
-                      <Link
-                        to={`${process.env.PUBLIC_URL}/user-profile-activity`}
-                        className={
-                          window.location.pathname ===
-                          `${process.env.PUBLIC_URL}/user-profile-activity`
-                            ? "active"
-                            : ""
-                        }
-                      >
-                        <Icon name="activity-round-fill"></Icon>
-                        <span>Account Activity</span>
+                        <span>Información personal</span>
                       </Link>
                     </li>
                     <li onClick={() => updateSm(false)}>
@@ -158,7 +130,7 @@ const UserProfileLayout = () => {
                         }
                       >
                         <Icon name="lock-alt-fill"></Icon>
-                        <span>Security Setting</span>
+                        <span>Seguridad</span>
                       </Link>
                     </li>
                   </ul>

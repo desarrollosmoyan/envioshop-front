@@ -13,7 +13,7 @@ const Layout = () => {
   const [themeState] = useState({
     main: "default",
     header: "light",
-    sidebar: "blue",
+    sidebar: "light",
     skin: "light",
   });
 

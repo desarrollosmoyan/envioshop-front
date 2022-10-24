@@ -8,6 +8,7 @@ import {
   ModalBody,
   DropdownItem,
   Form,
+  Row,
 } from "reactstrap";
 import {
   Block,
@@ -26,6 +27,7 @@ import {
   DataTableItem,
   TooltipComponent,
   PreviewAltCard,
+  RSelect,
 } from "../../components/Component";
 import Content from "../../layout/content/Content";
 import Head from "../../layout/head/Head";
@@ -33,17 +35,23 @@ import { userData } from "./UserData";
 import { findUpper } from "../../utils/Utils";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import axios from "axios";
-import useAxios from "../../hooks/useAxios";
-import { API_ENDPOINTS } from "../../constants";
 import { toast, ToastContainer } from "react-toastify";
 import useUser from "../../hooks/useUser";
+import exportFromJSON from "export-from-json";
 const FranchiseManagment = () => {
   const { getAll, create, deleteOne, updateOne } = useUser("franchise");
   const [franchisesList, setFranchisesList] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemPerPage, setItemPerPage] = useState(5);
+  const [count, setCount] = useState(0);
   useEffect(() => {
-    getAll(setFranchisesList);
-  }, []);
+    getAll(
+      [(currentPage - 1) * itemPerPage, itemPerPage],
+      setFranchisesList,
+      setCount
+    );
+  }, [itemPerPage, currentPage]);
+  console.log(currentPage);
   const [sm, updateSm] = useState(false);
   const [onSearchText] = useState("");
   const [modal, setModal] = useState({
@@ -54,12 +62,9 @@ const FranchiseManagment = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    balance: "",
-    phone: "",
-    status: "Active",
+    ubication: "",
+    cellphone: "",
   });
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemPerPage] = useState(10);
   // unselects the data on mount
   useEffect(() => {
     if (franchisesList.length === 0) return;
@@ -70,7 +75,6 @@ const FranchiseManagment = () => {
     });
     setFranchisesList([...newData]);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
   // Changing state value when searching name
   useEffect(() => {
     if (onSearchText !== "") {
@@ -100,30 +104,10 @@ const FranchiseManagment = () => {
     setFormData({
       name: "",
       email: "",
-      balance: "",
-      phone: "",
-      status: "Active",
+      ubication: "",
+      cellphone: "",
     });
   };
-  // function to add a new franchise
-  const createNewFranchise = async (body) => {
-    const url = `${API_ENDPOINTS.baseUrl}${API_ENDPOINTS.users.franchises.createFranchise}`;
-    console.log(url);
-    try {
-      const { data } = await axios({
-        method: "POST",
-        url: url,
-        data: body,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      toast.success("Franquicia creada con éxito");
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
   // function to close the form modal
   const onFormCancel = () => {
     setModal({ edit: false, add: false });
@@ -145,16 +129,6 @@ const FranchiseManagment = () => {
         toast("Franquicia creada con éxito", { type: "success" });
       })
       .catch(() => toast({ type: "error", message: "Algo salio mal" }));
-    /* 
-    createNewFranchise(submittedData)
-      .then((data) => {
-        console.log(data);
-        setFranchisesList([submittedData, ...franchisesList]);
-      })
-      .catch((error) => {
-        toast({ type: "error", message: "Algo salio mal" });
-      });
-    */
     resetForm();
     setModal({ edit: false }, { add: false });
   };
@@ -214,7 +188,6 @@ const FranchiseManagment = () => {
       item.checked = e.currentTarget.checked;
       return item;
     });
-    console.log(newData);
     setFranchisesList([...newData]);
   };
 
@@ -239,13 +212,45 @@ const FranchiseManagment = () => {
   };
 
   // Get current list, pagination
-  const indexOfLastItem = currentPage * itemPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemPerPage;
-  const currentItems = franchisesList.slice(indexOfFirstItem, indexOfLastItem);
+  //const indexOfLastItem = currentPage * itemPerPage;
+  //const indexOfFirstItem = indexOfLastItem - itemPerPage;
+  const currentItems = franchisesList;
+  const exportCSV = () => {
+    const fileName = `Lista de Franquicias-${new Date(
+      Date.now()
+    ).toLocaleDateString()}`;
+    const data = franchisesList.map((e) => ({
+      Nombre: e.name,
+      Ubicación: e.ubication,
+      Teléfono: e.cellphone,
+      "Cantidad de Ventas": e.sales.length,
+    }));
+    const exportType = exportFromJSON.types.csv;
+    exportFromJSON({ data, fileName, exportType });
+  };
 
   // Change Page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  const filterCityNames = () => {
+    const arr = franchisesList
+      .filter(
+        (franchise, index, arr) =>
+          index === arr.findIndex((t) => t.ubication === franchise.ubication)
+      )
+      .map((franchise) => ({
+        value: franchise.ubication,
+        label: franchise.ubication,
+      }));
+    return arr;
+  };
+  const filterFranchisesByCityName = (e) => {
+    const value = e.value;
+    const arr = franchisesList.filter((franchise) =>
+      franchise.ubication === value ? true : false
+    );
+    setFranchisesList(arr);
+  };
   const { errors, register, handleSubmit } = useForm();
   return (
     <React.Fragment>
@@ -277,9 +282,14 @@ const FranchiseManagment = () => {
                 >
                   <ul className="nk-block-tools g-3">
                     <li>
-                      <Button color="light" outline className="btn-white">
+                      <Button
+                        onClick={exportCSV}
+                        color="light"
+                        outline
+                        className="btn-white"
+                      >
                         <Icon name="download-cloud"></Icon>
-                        <span>Export</span>
+                        <span>Exportar</span>
                       </Button>
                     </li>
                     <li className="nk-block-tools-opt">
@@ -300,6 +310,26 @@ const FranchiseManagment = () => {
 
         <Block>
           <ToastContainer />
+          <Row className="justify-content-between">
+            <div className="w-15">
+              <label className="form-label">Filtrar por</label>
+              <RSelect
+                placeholder="Filtrar por"
+                options={filterCityNames()}
+                onChange={filterFranchisesByCityName}
+              />
+            </div>
+            <div className="w-15 align-self-end">
+              <RSelect
+                placeholder="Mostrar de:"
+                options={[5, 10, 20].map((e) => ({ label: e, value: e }))}
+                onChange={(e) => {
+                  setItemPerPage(e.value);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+          </Row>
           <div className="nk-tb-list is-separate is-medium mb-3">
             <DataTableHead className="nk-tb-item">
               <DataTableRow className="nk-tb-col-check">
@@ -400,7 +430,7 @@ const FranchiseManagment = () => {
                       >
                         <div className="user-card">
                           <UserAvatar
-                            theme={item.avatarBg}
+                            theme={"primary"}
                             text={findUpper(item.name)}
                             image={item.image}
                           ></UserAvatar>
@@ -421,10 +451,10 @@ const FranchiseManagment = () => {
                       <span>{item.ubication}</span>
                     </DataTableRow>
                     <DataTableRow size="lg">
-                      <span>{parseInt(Math.random() * 6)}</span>
+                      <span>{item.cashiers.length}</span>
                     </DataTableRow>
                     <DataTableRow size="lg">
-                      <span>{0}</span>
+                      <span>{item.sales.length}</span>
                     </DataTableRow>
                     <DataTableRow className="nk-tb-col-tools">
                       <ul className="nk-tb-actions gx-1">
@@ -511,7 +541,7 @@ const FranchiseManagment = () => {
             {currentItems.length > 0 ? (
               <PaginationComponent
                 itemPerPage={itemPerPage}
-                totalItems={franchisesList.length}
+                totalItems={count}
                 paginate={paginate}
                 currentPage={currentPage}
               />

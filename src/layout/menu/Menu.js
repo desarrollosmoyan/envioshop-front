@@ -3,7 +3,7 @@ import menu from "./MenuData";
 import { NavLink, Link } from "react-router-dom";
 import Icon from "../../components/icon/Icon";
 import classNames from "classnames";
-
+const type = localStorage.getItem("type") ? localStorage.getItem("type") : "";
 const MenuHeading = ({ heading }) => {
   return (
     <li className="nk-menu-heading">
@@ -299,19 +299,21 @@ const MenuSub = ({
 }) => {
   return (
     <ul className="nk-menu-sub" style={props.style}>
-      {sub.map((item) => (
-        <MenuItem
-          link={item.link}
-          icon={item.icon}
-          text={item.text}
-          sub={item.subMenu}
-          key={item.text}
-          newTab={item.newTab}
-          badge={item.badge}
-          sidebarToggle={sidebarToggle}
-          mobileView={mobileView}
-        />
-      ))}
+      {sub.map((item) =>
+        item.role[type] ? (
+          <MenuItem
+            link={item.link}
+            icon={item.icon}
+            text={item.text}
+            sub={item.subMenu}
+            key={item.text}
+            newTab={item.newTab}
+            badge={item.badge}
+            sidebarToggle={sidebarToggle}
+            mobileView={mobileView}
+          />
+        ) : null
+      )}
     </ul>
   );
 };
@@ -351,7 +353,7 @@ const Menu = ({ sidebarToggle, mobileView }) => {
             setMenuData={setMenuData}
             sidebarToggle={sidebarToggle}
           />
-        ) : (
+        ) : item.role[type] ? (
           <MenuItem
             key={item.text}
             link={item.link}
@@ -364,7 +366,7 @@ const Menu = ({ sidebarToggle, mobileView }) => {
             sidebarToggle={sidebarToggle}
             mobileView={mobileView}
           />
-        )
+        ) : null
       )}
     </ul>
   );

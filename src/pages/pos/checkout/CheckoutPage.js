@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router";
 import { Form, FormGroup } from "reactstrap";
-import { Button } from "../../../components/Component";
+import { Button, RSelect } from "../../../components/Component";
 import { companyLogos } from "../../../constants";
 import { ErrorMessage } from "@hookform/error-message";
 import { useDispatch } from "react-redux";
@@ -10,11 +10,20 @@ import { useSelector } from "react-redux";
 import { useState } from "react";
 import { useEffect } from "react";
 import ReactDatePicker from "react-datepicker";
+import { City, Country, State } from "country-state-city";
+import { Controller } from "react-hook-form";
 export default function CheckoutPage({ setPage }) {
   const dispatch = useDispatch();
-  const { register, errors, handleSubmit, setValue } = useForm();
+  const { register, errors, handleSubmit, setValue, watch, control } =
+    useForm();
   const [date, setDate] = useState(Date.now());
+  const selected = useSelector((state) => state.rating.selected);
+  const [countries, setCountries] = useState(Country.getAllCountries());
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
   const shipping = useSelector((state) => state.shipping.data);
+  const values = watch();
+  console.log(values);
   useEffect(() => {
     if (shipping) {
       setValue("shipperFullName", shipping.shipperFullName);
@@ -31,7 +40,20 @@ export default function CheckoutPage({ setPage }) {
       setValue("shipperCounty", shipping.shipperCounty);
       setValue("plannedShippingDate", shipping.plannedShippingDate);
     }
-  });
+  }, [shipping]);
+  useEffect(() => {
+    if (selected) {
+      dispatch(
+        setShipping({
+          data: {
+            ...shipping,
+            shipperPostalCode: selected.originPostalCode,
+            packageSize: selected.packageSize,
+          },
+        })
+      );
+    }
+  }, []);
   const handleFirstPageSubmit = (formData) => {
     console.log(formData);
     dispatch(
@@ -39,7 +61,7 @@ export default function CheckoutPage({ setPage }) {
         data: {
           ...shipping,
           ...formData,
-          shipperCellphone: `+${formData.shipperCellphoneCode} ${formData.shipperCellphone}`,
+          shipperCellphone: `${formData.shipperCellphone}`,
         },
       })
     );
@@ -48,8 +70,22 @@ export default function CheckoutPage({ setPage }) {
   const onChangeDate = (newDate) => {
     setDate(newDate);
   };
+  const onCountryChoose = (e) => {
+    const isoCode = e.value;
+    const arrOfStates = State.getStatesOfCountry(isoCode);
+    setStates(arrOfStates);
+  };
+  const onStateChoose = (e) => {
+    const isoCode = e.value;
+    const arrOfCities = City.getCitiesOfState(e.countryCode, isoCode);
+    setCities(arrOfCities);
+  };
   return (
-    <Form onSubmit={handleSubmit(handleFirstPageSubmit)}>
+    <Form
+      onSubmit={handleSubmit(handleFirstPageSubmit)}
+      style={{ height: "500px" }}
+      className="d-flex flex-column justify-content-between"
+    >
       <div className="mb-3">
         <h5>Información del que envia</h5>
       </div>
@@ -83,6 +119,7 @@ export default function CheckoutPage({ setPage }) {
             Empresa
           </label>
           <input
+            defaultValue="Envioshop"
             type="text"
             id="shipperCompanyName"
             name="shipperCompanyName"
@@ -97,18 +134,26 @@ export default function CheckoutPage({ setPage }) {
             render={({ message }) => <span className="invalid">{message}</span>}
           />
         </FormGroup>
-        <FormGroup>
+        <FormGroup className="col-md-4">
           <label htmlFor="shipperCountry" className="form-label">
             País
           </label>
-          <input
-            type="text"
-            id="shipperCountry"
-            ref={register({
-              required: "Este campo no puede estar vacío",
-            })}
+          <Controller
             name="shipperCountry"
-            className="form-control form-control-lg"
+            control={control}
+            render={({ onChange, ref, value }) => (
+              <RSelect
+                inputRef={ref}
+                options={countries.map((country) => ({
+                  label: country.name,
+                  value: country.isoCode,
+                }))}
+                onChange={(e) => {
+                  onCountryChoose(e);
+                  onChange(e.value);
+                }}
+              />
+            )}
           />
           <ErrorMessage
             errors={errors}
@@ -177,30 +222,25 @@ export default function CheckoutPage({ setPage }) {
           gap: "1rem",
         }}
       >
-        <FormGroup>
-          <label htmlFor="shipperCity" className="form-label">
-            Ciudad
-          </label>
-          <input
-            type="text"
-            id="shipperCity"
-            name="shipperCity"
-            ref={register({
-              required: "Este campo no puede estar vacío",
-            })}
-            className="form-control form-control-lg"
-          />
-          <ErrorMessage
-            errors={errors}
-            name="shipperCity"
-            render={({ message }) => <span className="invalid">{message}</span>}
-          />
-        </FormGroup>
-        <FormGroup>
+        <FormGroup className="col-md-3">
           <label htmlFor="shipperCounty" className="form-label">
             Estado/Provincia
           </label>
-          <input
+          <RSelect
+            placeholder="Estado de México"
+            id="shipperCounty"
+            name="shipperCounty"
+            ref={register({
+              required: "Este campo no puede estar vacio",
+            })}
+            options={states.map((state) => ({
+              label: state.name,
+              value: state.isoCode,
+              countryCode: state.countryCode,
+            }))}
+            onChange={onStateChoose}
+          />
+          {/*<input
             type="text"
             id="shipperCounty"
             name="shipperCounty"
@@ -208,10 +248,38 @@ export default function CheckoutPage({ setPage }) {
               required: "Este campo no puede estar vacío",
             })}
             className="form-control form-control-lg"
-          />
+          />*/}
           <ErrorMessage
             errors={errors}
             name="shipperCounty"
+            render={({ message }) => <span className="invalid">{message}</span>}
+          />
+        </FormGroup>
+        <FormGroup className="col-md-3">
+          <label htmlFor="shipperCity" className="form-label">
+            Ciudad
+          </label>
+          <Controller
+            name="shipperCity"
+            control={control}
+            render={({ onChange, ref }) => (
+              <RSelect
+                id="shipperCity"
+                inputRef={ref}
+                options={cities.map((city) => ({
+                  label: city.name,
+                  value: city.isoCode,
+                }))}
+                onChange={(e) => {
+                  onStateChoose(e);
+                  onChange(e.label);
+                }}
+              />
+            )}
+          />
+          <ErrorMessage
+            errors={errors}
+            name="shipperCity"
             render={({ message }) => <span className="invalid">{message}</span>}
           />
         </FormGroup>

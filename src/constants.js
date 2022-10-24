@@ -250,3 +250,34 @@ export const companyLogos = {
   ESTAFETA: ESTAFETALOGO,
   PAQUETEEXPRESS: PAQUETEEXPRESSLOGO,
 };
+
+export const defaultShipmentData = {
+  id: "",
+  serviceName: "",
+  serviceType: "",
+  shipmentPrice: "",
+  shipmentPdf: "",
+  shipmentDescription: "",
+  shipper: {
+    postalCode: "",
+  },
+  receiver: {
+    postalCode: "",
+  },
+  franchiseId: "",
+  turnId: "",
+  createdAt: "",
+  updatedAt: "",
+  franchise: {
+    id: "",
+    email: "",
+    name: "",
+  },
+  Turn: {
+    id: "",
+    createdAt: "",
+    cashier: {
+      name: "",
+    },
+  },
+};

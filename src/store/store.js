@@ -25,6 +25,7 @@ const ratingSlice = createSlice({
   initialState: {
     data: null,
     selected: null,
+    selectedToSend: null,
   },
   reducers: {
     setRating: (state, action) => {
@@ -32,6 +33,9 @@ const ratingSlice = createSlice({
     },
     selectRating: (state, action) => {
       state.selected = action.payload.selected;
+    },
+    selectToSend: (state, action) => {
+      state.selectedToSend = action.payload.selectedToSend;
     },
   },
 });

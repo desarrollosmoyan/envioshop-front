@@ -5,6 +5,7 @@ const RSelect = ({ ...props }) => {
   return (
     <div className="form-control-select">
       <Select
+        noOptionsMessage={() => "No hay opciones"}
         className={`react-select-container ${
           props.className ? props.className : ""
         }`}

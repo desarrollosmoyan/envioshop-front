@@ -2,7 +2,13 @@ import React from "react";
 import { Card } from "reactstrap";
 import { Icon } from "../../Component";
 
-const DataCard = ({ title, amount, percentChange, up, chart: ChartComponent }) => {
+const DataCard = ({
+  title,
+  amount,
+  percentChange,
+  up,
+  chart: ChartComponent,
+}) => {
   return (
     <Card>
       <div className="nk-ecwg nk-ecwg6">
@@ -18,11 +24,15 @@ const DataCard = ({ title, amount, percentChange, up, chart: ChartComponent }) =
               <div className="nk-ecwg6-ck">{ChartComponent}</div>
             </div>
             <div className="info">
-              <span className={`change ${up ? "up text-success" : "down text-danger"}`}>
+              <span
+                className={`change ${
+                  up ? "up text-success" : "down text-danger"
+                }`}
+              >
                 <Icon name={`arrow-long-${up ? "up" : "down"}`}></Icon>
                 {percentChange}%
               </span>
-              <span> vs. last week</span>
+              <span> contra la última semana</span>
             </div>
           </div>
         </div>

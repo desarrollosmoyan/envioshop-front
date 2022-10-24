@@ -7,8 +7,10 @@ import { Button } from "../../components/Component";
 import { API_ENDPOINTS, countryItems } from "../../constants";
 import { useDispatch } from "react-redux";
 import { setRating } from "../../store/store";
+import { selectRating } from "../../store/store";
 import { toast, ToastContainer } from "react-toastify";
 import Input from "../../components/input/input/Input";
+import { useSelector } from "react-redux";
 export default function PosForm() {
   const [isLoading, setLoading] = useState(true);
   const dispatch = useDispatch();
@@ -50,8 +52,22 @@ export default function PosForm() {
       });
       setLoading(false);
       dispatch(setRating({ data: data }));
+      dispatch(
+        selectRating({
+          selected: {
+            originPostalCode: formData.originPostalCode,
+            destinyPostalCode: formData.destinyPostalCode,
+            packageSize: {
+              length: formData.length,
+              width: formData.width,
+              height: formData.height,
+              weight: formData.weight,
+            },
+          },
+        })
+      );
     } catch (error) {
-      console.log("el pepe");
+      toast("Algo salió mal!", { type: "error" });
     }
   };
   return (

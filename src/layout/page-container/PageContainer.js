@@ -3,9 +3,9 @@ import React, { useEffect, useState } from "react";
 const PageContainer = ({ ...props }) => {
   const [themeState] = useState({
     main: "default",
-    header: "dark",
-    sidebar: "dark",
-    skin: "dark",
+    header: "light",
+    sidebar: "light",
+    skin: "light",
   });
 
   useEffect(() => {

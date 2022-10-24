@@ -8,6 +8,7 @@ import { Button } from "../Component";
 import Input from "../input/input/Input";
 import { useDispatch } from "react-redux";
 import { selectRating, setRating } from "../../store/store";
+import { useSelector } from "react-redux";
 
 const Table = ({
   tableData,
@@ -19,10 +20,12 @@ const Table = ({
   responsive,
 }) => {
   const dispatch = useDispatch();
+  const selected = useSelector((state) => state.rating.selected);
   console.log(tableData);
   const handleClick = (item) => {
-    dispatch(selectRating({ selected: item }));
+    dispatch(selectRating({ selected: { ...selected, ...item } }));
   };
+  console.log(selected);
   const tableClass = classNames({
     table: true,
     "table-bordered": border,
@@ -35,10 +38,14 @@ const Table = ({
     FEDEX: companyLogos.FEDEX,
     UPS: companyLogos.UPS,
     ESTAFETA: companyLogos.ESTAFETA,
+    REDPACK: companyLogos.REDPACK,
     "PAQUETE EXPRESS": companyLogos.PAQUETEEXPRESS,
   };
   return (
-    <div className={`${responsive ? "table-responsive" : ""} h-100`}>
+    <div
+      className={`${responsive ? "table-responsive" : ""} h-100`}
+      style={{ overflowX: "hidden" }}
+    >
       <table className={tableClass}>
         <thead className={`${headColor ? `thead-${headColor}` : ""}`}>
           <tr>
@@ -51,7 +58,7 @@ const Table = ({
             })}
           </tr>
         </thead>
-        <tbody className="w-100">
+        <tbody className="w-100 h-50">
           {tableData?.data.map((item, i) => {
             if (item === null) {
               return;

@@ -8,6 +8,7 @@ import {
   ModalBody,
   DropdownItem,
   Form,
+  Row,
 } from "reactstrap";
 import {
   Block,
@@ -30,25 +31,58 @@ import {
 } from "../../components/Component";
 import Content from "../../layout/content/Content";
 import Head from "../../layout/head/Head";
-import { filterStatus, userData } from "./UserData";
+import { userData } from "./UserData";
 import { findUpper } from "../../utils/Utils";
 import { Link } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import useAxios from "../../hooks/useAxios";
-import { API_ENDPOINTS } from "../../constants";
-import axios from "axios";
+import { Controller, useForm } from "react-hook-form";
 import { toast, ToastContainer } from "react-toastify";
 import useUser from "../../hooks/useUser";
+import exportFromJSON from "export-from-json";
+import { useCookie } from "react-use";
+import axios from "axios";
+import { useSelector } from "react-redux";
 const CashierManagment = () => {
+  const [token] = useCookie("token");
   const { getAll, create, deleteOne, updateOne } = useUser("cashier");
   const { getAll: getAllFranchises } = useUser("franchise");
   const [cashiersList, setCashiersList] = useState([]);
   const [franchiseList, setFranchisesList] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [count, setCount] = useState(0);
+  const [itemPerPage, setItemPerPage] = useState(10);
+  const [currentFranchise, setCurrentFranchise] = useState(null);
+  const user = useSelector((state) => state.user);
   useEffect(() => {
-    getAll(setCashiersList);
-    getAllFranchises(setFranchisesList);
-  }, []);
-  console.log(franchiseList);
+    if (user.type === "admin") {
+      getAll(
+        [(currentPage - 1) * itemPerPage, itemPerPage],
+        setCashiersList,
+        setCount
+      );
+      getAllFranchises([0, 20], setFranchisesList);
+      return;
+    }
+    if (user.type === "franchise") {
+      console.log(user.type);
+      getMe();
+    }
+  }, [itemPerPage, currentPage]);
+
+  const getMe = async () => {
+    try {
+      const resp = await axios.get("http://localhost:5000/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setCurrentFranchise(resp.data.user);
+      setCashiersList(resp.data.user.cashiers);
+      console.log(resp.data.user);
+      return resp.data;
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const [sm, updateSm] = useState(false);
   const [onSearchText] = useState("");
   const [modal, setModal] = useState({
@@ -59,21 +93,20 @@ const CashierManagment = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
+    franchiseId: "",
   });
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemPerPage] = useState(10);
 
   // unselects the data on mount
   useEffect(() => {
+    if (cashiersList.length === 0) return;
     let newData;
-    newData = userData.map((item) => {
+    newData = cashiersList.map((item) => {
       item.checked = false;
       return item;
     });
     setCashiersList([...newData]);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
+  console.log(cashiersList);
   // Changing state value when searching name
   useEffect(() => {
     if (onSearchText !== "") {
@@ -93,6 +126,7 @@ const CashierManagment = () => {
   const onSelectChange = (e, id) => {
     let newData = cashiersList;
     let index = newData.findIndex((item) => item.id === id);
+    console.log(newData, id);
     newData[index].checked = e.currentTarget.checked;
     setCashiersList([...newData]);
   };
@@ -102,8 +136,7 @@ const CashierManagment = () => {
     setFormData({
       name: "",
       email: "",
-      phone: "",
-      status: "Active",
+      franchiseId: "",
     });
   };
 
@@ -113,29 +146,14 @@ const CashierManagment = () => {
     resetForm();
   };
 
-  //Create a new cashier
-
-  const createOneCashier = async (dataToSubmit) => {
-    try {
-      const { data } = await axios({
-        method: "POST",
-        data: dataToSubmit,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      toast("Cajero creado con éxito", { type: "success" });
-    } catch (error) {
-      toast("No se puede crear el cajero", { type: "error" });
-    }
-  };
   // submit function to add a new item
   const onFormSubmit = (submitData) => {
-    const { name, email, password, franchiseId } = submitData;
+    const { name, email } = submitData;
+    const { franchiseId } = formData;
     let submittedData = {
       name: name,
       email: email,
-      password: password,
+      password: "Envioshop.22",
       franchiseId: franchiseId,
     };
     create(submittedData)
@@ -147,25 +165,37 @@ const CashierManagment = () => {
 
   // submit function to update a new item
   const onEditSubmit = (submitData) => {
-    const { name, email } = submitData;
+    const { name, email, franchiseId } = submitData;
     let submittedData;
     let newitems = cashiersList;
+    console.log(submitData);
     newitems.forEach((item) => {
       if (item.id === editId) {
         submittedData = {
-          id: item.id,
           name: name,
           email: email,
+          franchiseId: franchiseId,
         };
       }
     });
     updateOne(editId, submittedData)
-      .then(() => toast(`Cajero editado con éxito`, { type: "success" }))
-      .catch(() => {
+      .then(() => {
+        toast(`Cajero editado con éxito`, { type: "success" });
+      })
+      .catch((error) => {
+        console.log(error);
         toast("Algo salio mal!", { type: "error" });
       });
     let index = newitems.findIndex((item) => item.id === editId);
-    newitems[index] = submittedData;
+    newitems[index] = {
+      ...newitems[index],
+      name: submittedData.name,
+      email: submittedData.email,
+      franchise: {
+        ...franchiseList.find((f) => f.id === franchiseId),
+      },
+    };
+    console.log(newitems[index]);
     setModal({ edit: false });
     resetForm();
   };
@@ -177,8 +207,7 @@ const CashierManagment = () => {
         setFormData({
           name: item.name,
           email: item.email,
-          status: item.status,
-          phone: item.phone,
+          franchiseId: item.franchiseId,
         });
         setModal({ edit: true }, { add: false });
         setEditedId(id);
@@ -196,6 +225,7 @@ const CashierManagment = () => {
 
   // function to change the check property of an item
   const selectorCheck = (e) => {
+    console.log(e);
     let newData;
     newData = cashiersList.map((item) => {
       item.checked = e.currentTarget.checked;
@@ -208,20 +238,9 @@ const CashierManagment = () => {
   const selectorDeleteUser = async () => {
     let newData = cashiersList.filter((item) => item.checked === true);
     let restData = cashiersList.filter((item) => item.checked !== true);
-    try {
-      const { data } = await axios.delete(
-        `${API_ENDPOINTS.baseUrl}${API_ENDPOINTS.users.cashiers.deleteCashier}/${newData[0].id}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      toast("Franquicia eliminada con éxito", { type: "success" });
-    } catch (error) {
-      toast(`${error.message}`, { type: "error" });
-    }
-
+    deleteOne(newData[0].id)
+      .then(() => toast("Cajero eliminado con éxito", { type: "success" }))
+      .catch(() => toast("Ups! Algo salió mal!", { type: "error" }));
     setCashiersList([...restData]);
   };
 
@@ -238,13 +257,49 @@ const CashierManagment = () => {
   // Get current list, pagination
   const indexOfLastItem = currentPage * itemPerPage;
   const indexOfFirstItem = indexOfLastItem - itemPerPage;
-  const currentItems = cashiersList.slice(indexOfFirstItem, indexOfLastItem);
-
+  const currentItems = cashiersList;
   // Change Page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const { errors, register, handleSubmit } = useForm();
-  const [role, setRole] = useState("cashier");
+  const filterFranchiseName = () => {
+    console.log(cashiersList);
+    const arr = cashiersList
+      .filter(
+        (cashier, index, arr) =>
+          index ===
+          arr.findIndex((t) => t.franchise.name === cashier.franchise.name)
+      )
+      .map((cashier) => ({
+        value: cashier.franchise.name,
+        label: cashier.franchise.name,
+      }));
+    return arr;
+  };
+
+  const handleCashierNameFilterChange = (e) => {
+    const value = e.value;
+    const arr = cashiersList.filter((cashier) =>
+      cashier.franchise.name === value ? true : false
+    );
+    setCashiersList(arr);
+  };
+
+  const exportCSV = () => {
+    const fileName = `Lista de Cajeros-${new Date(
+      Date.now()
+    ).toLocaleDateString()}`;
+    const data = cashiersList.map((e) => ({
+      nombre: e.name,
+      franquicia: e.franchise.name,
+      email: e.email,
+      "Fecha de creación": new Date(e.createdAt).toLocaleDateString(),
+      "Email Franquicia": e.franchise.email,
+    }));
+    const exportType = exportFromJSON.types.csv;
+    exportFromJSON({ data, fileName, exportType });
+  };
+
+  const { errors, register, handleSubmit, setValue, control } = useForm();
   return (
     <React.Fragment>
       <Head title="User List - Default"></Head>
@@ -275,7 +330,12 @@ const CashierManagment = () => {
                 >
                   <ul className="nk-block-tools g-3">
                     <li>
-                      <Button color="light" outline className="btn-white">
+                      <Button
+                        onClick={exportCSV}
+                        color="light"
+                        outline
+                        className="btn-white"
+                      >
                         <Icon name="download-cloud"></Icon>
                         <span>Exportar</span>
                       </Button>
@@ -298,6 +358,28 @@ const CashierManagment = () => {
 
         <Block>
           <ToastContainer />
+          <Row className="justify-content-between">
+            <div className="w-15">
+              <label className="form-label">Filtrar por</label>
+              {user.type === "admin" ? (
+                <RSelect
+                  placeholder="Filtrar por"
+                  options={filterFranchiseName()}
+                  onChange={handleCashierNameFilterChange}
+                />
+              ) : null}
+            </div>
+            <div className="w-15 align-self-end">
+              <RSelect
+                placeholder="Mostrar de:"
+                options={[5, 10, 20].map((e) => ({ label: e, value: e }))}
+                onChange={(e) => {
+                  setItemPerPage(e.value);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+          </Row>
           <div className="nk-tb-list is-separate is-medium mb-3">
             <DataTableHead className="nk-tb-item">
               <DataTableRow className="nk-tb-col-check">
@@ -315,7 +397,12 @@ const CashierManagment = () => {
                 <span className="sub-text">Usuario</span>
               </DataTableRow>
               <DataTableRow size="lg">
-                <span className="sub-text">Franquicia</span>
+                {user.type === "admin" ? (
+                  <span className="sub-text">Franquicia</span>
+                ) : null}
+              </DataTableRow>
+              <DataTableRow size="lg">
+                <span className="sub-text">Fecha de creación</span>
               </DataTableRow>
               <DataTableRow className="nk-tb-col-tools text-right">
                 <UncontrolledDropdown>
@@ -337,10 +424,10 @@ const CashierManagment = () => {
                           }}
                         >
                           <Icon name="na"></Icon>
-                          <span>Remove Selected</span>
+                          <span>Eliminar seleccionado</span>
                         </DropdownItem>
                       </li>
-                      <li>
+                      {/*<li>
                         <DropdownItem
                           tag="a"
                           href="#"
@@ -352,7 +439,7 @@ const CashierManagment = () => {
                           <Icon name="trash"></Icon>
                           <span>Suspend Selected</span>
                         </DropdownItem>
-                      </li>
+                        </li>*/}
                     </ul>
                   </DropdownMenu>
                 </UncontrolledDropdown>
@@ -380,11 +467,16 @@ const CashierManagment = () => {
                     </DataTableRow>
                     <DataTableRow>
                       <Link
-                        to={`${process.env.PUBLIC_URL}/user-details-regular/${item.id}`}
+                        to={{
+                          pathname: `${process.env.PUBLIC_URL}/user-details-regular/${item.id}`,
+                          state: {
+                            type: "cashier",
+                          },
+                        }}
                       >
                         <div className="user-card">
                           <UserAvatar
-                            theme={item.avatarBg}
+                            theme={"primary"}
                             text={findUpper(item.name)}
                             image={item.image}
                           ></UserAvatar>
@@ -398,6 +490,16 @@ const CashierManagment = () => {
                         </div>
                       </Link>
                     </DataTableRow>
+                    <DataTableRow>
+                      {user.type === "admin" ? (
+                        <span>{item.franchise.name}</span>
+                      ) : null}
+                    </DataTableRow>
+                    <DataTableRow>
+                      <span>
+                        {new Date(item.createdAt).toLocaleDateString()}
+                      </span>
+                    </DataTableRow>
                     <DataTableRow className="nk-tb-col-tools">
                       <ul className="nk-tb-actions gx-1">
                         <li
@@ -410,10 +512,10 @@ const CashierManagment = () => {
                             id={"edit" + item.id}
                             icon="edit-alt-fill"
                             direction="top"
-                            text="Edit"
+                            text="Editar"
                           />
                         </li>
-                        {item.status !== "Suspend" && (
+                        {/*item.status !== "Suspend" && (
                           <React.Fragment>
                             <li
                               className="nk-tb-action-hidden"
@@ -429,7 +531,7 @@ const CashierManagment = () => {
                               />
                             </li>
                           </React.Fragment>
-                        )}
+                        )*/}
                         <li>
                           <UncontrolledDropdown>
                             <DropdownToggle
@@ -449,10 +551,10 @@ const CashierManagment = () => {
                                     }}
                                   >
                                     <Icon name="edit"></Icon>
-                                    <span>Edit</span>
+                                    <span>Editar</span>
                                   </DropdownItem>
                                 </li>
-                                {item.status !== "Suspend" && (
+                                {/*item.status !== "Suspend" && (
                                   <React.Fragment>
                                     <li className="divider"></li>
                                     <li onClick={() => suspendUser(item.id)}>
@@ -468,7 +570,7 @@ const CashierManagment = () => {
                                       </DropdownItem>
                                     </li>
                                   </React.Fragment>
-                                )}
+                                      )*/}
                               </ul>
                             </DropdownMenu>
                           </UncontrolledDropdown>
@@ -483,7 +585,7 @@ const CashierManagment = () => {
             {currentItems.length > 0 ? (
               <PaginationComponent
                 itemPerPage={itemPerPage}
-                totalItems={cashiersList.length}
+                totalItems={count}
                 paginate={paginate}
                 currentPage={currentPage}
               />
@@ -564,15 +666,20 @@ const CashierManagment = () => {
                         Seleccionar franquicia
                       </label>
                       <div className="form-control-wrap">
-                        <RSelect
-                          options={franchiseList.map((item) => ({
-                            label: item.name,
-                            value: item.id,
-                          }))}
-                          placeholder="Selecciona franquicia"
-                          onChange={(e) =>
-                            setFormData({ ...formData, status: e.value })
-                          }
+                        <Controller
+                          name="franchiseId"
+                          control={control}
+                          render={({ onChange, ref, value }) => (
+                            <RSelect
+                              inputRef={ref}
+                              options={franchiseList.map((item) => ({
+                                label: item.name,
+                                value: item.id,
+                              }))}
+                              placeholder="Selecciona franquicia"
+                              onChange={(e) => onChange(e.value)}
+                            />
+                          )}
                         />
                       </div>
                     </FormGroup>
@@ -622,7 +729,7 @@ const CashierManagment = () => {
               <Icon name="cross-sm"></Icon>
             </a>
             <div className="p-2">
-              <h5 className="title">Update User</h5>
+              <h5 className="title">Editar cajero</h5>
               <div className="mt-4">
                 <Form
                   className="row gy-4"
@@ -630,13 +737,13 @@ const CashierManagment = () => {
                 >
                   <Col md="6">
                     <FormGroup>
-                      <label className="form-label">Name</label>
+                      <label className="form-label">Nombre</label>
                       <input
                         className="form-control"
                         type="text"
                         name="name"
                         defaultValue={formData.name}
-                        placeholder="Enter name"
+                        placeholder="Ingrese el nombre"
                         ref={register({ required: "This field is required" })}
                       />
                       {errors.name && (
@@ -652,7 +759,7 @@ const CashierManagment = () => {
                         type="text"
                         name="email"
                         defaultValue={formData.email}
-                        placeholder="Enter email"
+                        placeholder="Ingrese el email"
                         ref={register({
                           required: "This field is required",
                           pattern: {
@@ -666,43 +773,39 @@ const CashierManagment = () => {
                       )}
                     </FormGroup>
                   </Col>
-                  <Col md="6">
+                  <Col md="12" className="mt-2 mb-2">
                     <FormGroup>
-                      <label className="form-label">Phone</label>
-                      <input
-                        className="form-control"
-                        type="number"
-                        name="phone"
-                        defaultValue={Number(formData.phone)}
-                        ref={register({ required: "This field is required" })}
-                      />
-                      {errors.phone && (
-                        <span className="invalid">{errors.phone.message}</span>
-                      )}
-                    </FormGroup>
-                  </Col>
-                  <Col md="12">
-                    <FormGroup>
-                      <label className="form-label">Status</label>
+                      <label className="form-label">
+                        Selecciona Franquicia
+                      </label>
                       <div className="form-control-wrap">
-                        <RSelect
-                          options={filterStatus}
-                          defaultValue={{
-                            value: formData.status,
-                            label: formData.status,
-                          }}
-                          onChange={(e) =>
-                            setFormData({ ...formData, status: e.value })
-                          }
+                        <Controller
+                          name="franchiseId"
+                          control={control}
+                          render={({ onChange, ref, value }) => (
+                            <RSelect
+                              value={value}
+                              inputRef={ref}
+                              options={franchiseList.map((item) => ({
+                                label: item.name,
+                                value: item.id,
+                              }))}
+                              placeholder="Selecciona franquicia"
+                              onChange={(e) => {
+                                onChange(e.value);
+                                console.log(e);
+                              }}
+                            />
+                          )}
                         />
                       </div>
                     </FormGroup>
                   </Col>
                   <Col size="12">
                     <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
-                      <li>
+                      <li className="mr-4">
                         <Button color="primary" size="md" type="submit">
-                          Update User
+                          Confirmar edición
                         </Button>
                       </li>
                       <li>
@@ -714,7 +817,9 @@ const CashierManagment = () => {
                           }}
                           className="link link-light"
                         >
-                          Cancel
+                          <Button color="danger" size="md">
+                            Cancelar
+                          </Button>
                         </a>
                       </li>
                     </ul>

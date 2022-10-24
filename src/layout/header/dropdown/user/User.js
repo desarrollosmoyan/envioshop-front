@@ -6,22 +6,45 @@ import UserAvatar from "../../../../components/user/UserAvatar";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../../../store/store";
+import { useCookie } from "react-use";
+import axios from "axios";
 const User = () => {
-  useEffect(() => {
-    const userData = localStorage.getItem("userData");
-    console.log(userData);
-    if (!userData) return;
-    dispatch(setUser(JSON.parse(userData)));
-  }, []);
+  const [token, setToken, deleteToken] = useCookie("token");
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const toggle = () => setOpen((prevState) => !prevState);
   const handleSignout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("userData");
+    deleteToken();
+    //localStorage.removeItem("accessToken");
+    //localStorage.removeItem("userData");
+  };
+
+  useEffect(() => {
+    if (!token) return;
+    getUser(token);
+    /* const userData = localStorage.getItem("userData");
+    if (!userData) return;
+    dispatch(setUser(JSON.parse(userData)));*/
+  }, []);
+  const getUser = async (token) => {
+    try {
+      const { data } = await axios.get("http://localhost:5000/user", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      dispatch(setUser(data.user));
+    } catch (error) {
+      console.log("error", error);
+    }
   };
   const user = useSelector((state) => state.user);
   console.log(user);
+  const type = {
+    cashier: "Cajero",
+    admin: "Administrador",
+    franchise: "Franquicia",
+  };
   return (
     <Dropdown isOpen={open} className="user-dropdown" toggle={toggle}>
       <DropdownToggle
@@ -33,9 +56,9 @@ const User = () => {
         }}
       >
         <div className="user-toggle">
-          <UserAvatar icon="user-alt" className="sm" />
+          <UserAvatar theme="primary" icon="user-alt" className="sm" />
           <div className="user-info d-none d-md-block">
-            <div className="user-status">Administrator</div>
+            <div className="user-status">{type[user.type]}</div>
             <div className="user-name dropdown-indicator text-capitalize">
               {user.name}
             </div>
@@ -61,21 +84,14 @@ const User = () => {
               icon="user-alt"
               onClick={toggle}
             >
-              View Profile
+              Ver perfil
             </LinkItem>
             <LinkItem
               link="/user-profile-setting"
               icon="setting-alt"
               onClick={toggle}
             >
-              Account Setting
-            </LinkItem>
-            <LinkItem
-              link="/user-profile-activity"
-              icon="activity-alt"
-              onClick={toggle}
-            >
-              Login Activity
+              Configuración de la cuenta
             </LinkItem>
           </LinkList>
         </div>
@@ -86,7 +102,7 @@ const User = () => {
               onClick={handleSignout}
             >
               <Icon name="signout"></Icon>
-              <span>Sign Out</span>
+              <span>Cerrar sesión</span>
             </a>
           </LinkList>
         </div>

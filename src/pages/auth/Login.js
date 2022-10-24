@@ -9,8 +9,8 @@ import {
   Icon,
   PreviewCard,
 } from "../../components/Component";
-import Logo from "../../images/logo.webp";
-import LogoDark from "../../images/logo-dark.png";
+import EnvishopLogo from "../../images/logo.webp";
+import EnvioshopLogoDark from "../../images/logo.webp";
 import { Form, FormGroup, Spinner, Alert } from "reactstrap";
 import PageContainer from "../../layout/page-container/PageContainer";
 import Head from "../../layout/head/Head";
@@ -23,9 +23,11 @@ import { toast, ToastContainer } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { setUser } from "../../store/store";
+import { useCookie } from "react-use";
 const Login = () => {
   const [loading, setLoading] = useState(false);
   const [passState, setPassState] = useState(false);
+  const [token, setToken] = useCookie("token");
   const [errorVal, setError] = useState("");
   const dispatch = useDispatch();
   const history = useHistory();
@@ -33,14 +35,9 @@ const Login = () => {
     setLoading(true);
     try {
       const { data } = await axios.post(API_ENDPOINTS.auth.signin, formData);
-      const { name, email, type } = data.user;
-      console.log(data);
-      localStorage.setItem("accessToken", data.token);
-      localStorage.setItem(
-        "userData",
-        JSON.stringify({ name: name, email: email, type: type })
-      );
-      dispatch(setUser({ name: name, email: email, type: type }));
+      setToken(data.token);
+      dispatch(setUser(data.user));
+      localStorage.setItem("type", data.user.type);
       toast.success("Usuario logeado con éxito", {
         position: "bottom-center",
         autoClose: 2000,
@@ -55,6 +52,7 @@ const Login = () => {
         history.push(
           `${process.env.PUBLIC_URL ? process.env.PUBLIC_URL : "/"}`
         );
+        window.location.reload();
       }, 2000);
     } catch (error) {
       setError(error);
@@ -73,12 +71,12 @@ const Login = () => {
             <Link to={process.env.PUBLIC_URL + "/"} className="logo-link">
               <img
                 className="logo-light logo-img logo-img-lg"
-                src={Logo}
+                src={EnvioshopLogoDark}
                 alt="logo"
               />
               <img
                 className="logo-dark logo-img logo-img-lg"
-                src={LogoDark}
+                src={EnvishopLogo}
                 alt="logo-dark"
               />
             </Link>
@@ -125,7 +123,7 @@ const Login = () => {
                 </div>
               </FormGroup>
               <FormGroup>
-                <div className="form-label-group">
+                {/*} <div className="form-label-group">
                   <label className="form-label" htmlFor="password">
                     Contraseña
                   </label>
@@ -135,7 +133,7 @@ const Login = () => {
                   >
                     Olvidaste tu contraseña?
                   </Link>
-                </div>
+                  </div>*/}
                 <div className="form-control-wrap">
                   <a
                     href="#password"
@@ -180,42 +178,6 @@ const Login = () => {
                 </Button>
               </FormGroup>
             </Form>
-            <div className="form-note-s2 text-center pt-4">
-              {" "}
-              Nuevo en la plataforma?{" "}
-              <Link to={`${process.env.PUBLIC_URL}/auth-register`}>
-                Crea una cuenta!
-              </Link>
-            </div>
-            <div className="text-center pt-4 pb-3">
-              <h6 className="overline-title overline-title-sap">
-                <span>OR</span>
-              </h6>
-            </div>
-            <ul className="nav justify-center gx-4">
-              <li className="nav-item">
-                <a
-                  className="nav-link"
-                  href="#socials"
-                  onClick={(ev) => {
-                    ev.preventDefault();
-                  }}
-                >
-                  Facebook
-                </a>
-              </li>
-              <li className="nav-item">
-                <a
-                  className="nav-link"
-                  href="#socials"
-                  onClick={(ev) => {
-                    ev.preventDefault();
-                  }}
-                >
-                  Google
-                </a>
-              </li>
-            </ul>
           </PreviewCard>
         </Block>
         <AuthFooter />

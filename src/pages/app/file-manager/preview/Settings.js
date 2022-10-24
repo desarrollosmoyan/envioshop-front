@@ -12,7 +12,12 @@ import {
 import { Modal } from "reactstrap";
 import { findUpper } from "../../../../utils/Utils";
 import { FileManagerContext } from "../FileManagerContext";
-import { pricingTableDataV2, selectDateFormat, selectLanguageOptions, selectTimezoneFormat } from "../Data";
+import {
+  pricingTableDataV2,
+  selectDateFormat,
+  selectLanguageOptions,
+  selectTimezoneFormat,
+} from "../Data";
 import { Link } from "react-router-dom";
 
 const SettingsPreview = ({ toggleScreenLg }) => {
@@ -36,7 +41,7 @@ const SettingsPreview = ({ toggleScreenLg }) => {
       <BlockHead size="md">
         <BlockBetween className="position-relative">
           <BlockHeadContent>
-            <BlockTitle page>Settings</BlockTitle>
+            <BlockTitle page>Ajustes</BlockTitle>
           </BlockHeadContent>
           <BlockHeadContent>
             <ul className="nk-block-tools g-1">
@@ -58,7 +63,11 @@ const SettingsPreview = ({ toggleScreenLg }) => {
       </BlockHead>
 
       <ul className="nk-nav nav nav-tabs">
-        <li className={`nav-item ${tabs === "General" ? "active current-page" : ""}`}>
+        <li
+          className={`nav-item ${
+            tabs === "General" ? "active current-page" : ""
+          }`}
+        >
           <a
             className="nav-link"
             href="#tabs"
@@ -70,7 +79,11 @@ const SettingsPreview = ({ toggleScreenLg }) => {
             General
           </a>
         </li>
-        <li className={`nav-item ${tabs === "Security" ? "active current-page" : ""}`}>
+        <li
+          className={`nav-item ${
+            tabs === "Security" ? "active current-page" : ""
+          }`}
+        >
           <a
             className="nav-link"
             href="#tabs"
@@ -82,7 +95,11 @@ const SettingsPreview = ({ toggleScreenLg }) => {
             Security
           </a>
         </li>
-        <li className={`nav-item ${tabs === "Billings" ? "active current-page" : ""}`}>
+        <li
+          className={`nav-item ${
+            tabs === "Billings" ? "active current-page" : ""
+          }`}
+        >
           <a
             className="nav-link"
             href="#tabs"
@@ -94,7 +111,11 @@ const SettingsPreview = ({ toggleScreenLg }) => {
             Billings
           </a>
         </li>
-        <li className={`nav-item ${tabs === "Notifications" ? "active current-page" : ""}`}>
+        <li
+          className={`nav-item ${
+            tabs === "Notifications" ? "active current-page" : ""
+          }`}
+        >
           <a
             className="nav-link"
             href="#tabs"
@@ -111,7 +132,11 @@ const SettingsPreview = ({ toggleScreenLg }) => {
       <Block size="xs" className="pt-0">
         <div className="user-card user-card-md py-md-5 py-4">
           <UserAvatar size="md" text={findUpper(formData.name)}>
-            <a href="#edit" onClick={(ev) => ev.preventDefault()} className="edit edit-upload">
+            <a
+              href="#edit"
+              onClick={(ev) => ev.preventDefault()}
+              className="edit edit-upload"
+            >
               <Icon name="img"></Icon>
             </a>
           </UserAvatar>
@@ -154,18 +179,26 @@ const SettingsPreview = ({ toggleScreenLg }) => {
                 <Icon name="hard-drive"></Icon> <span>{plan} plan</span>
               </div>
               <div className="user-plan-status">
-                12.47 GB / {pricingTableDataV2.find((item) => item.title === plan).memory}.00 GB
+                12.47 GB /{" "}
+                {pricingTableDataV2.find((item) => item.title === plan).memory}
+                .00 GB
               </div>
             </div>
             <div className="user-plan-actions">
               <ul className="btn-toolbar align-center g-4">
                 <li className="order-2 order-sm-1">
-                  <Link to={`${process.env.PUBLIC_URL}/app-file-manager/pricing`} className="link link-primary">
+                  <Link
+                    to={`${process.env.PUBLIC_URL}/app-file-manager/pricing`}
+                    className="link link-primary"
+                  >
                     See all plans
                   </Link>
                 </li>
                 <li className="order-1 order-sm-2">
-                  <Link to={`${process.env.PUBLIC_URL}/app-file-manager/pricing`} className="btn btn-sm btn-primary">
+                  <Link
+                    to={`${process.env.PUBLIC_URL}/app-file-manager/pricing`}
+                    className="btn btn-sm btn-primary"
+                  >
                     Upgrade
                   </Link>
                 </li>
@@ -175,7 +208,13 @@ const SettingsPreview = ({ toggleScreenLg }) => {
               <div className="progress progress-md bg-light">
                 <div
                   className="progress-bar"
-                  style={{ width: `${1200 / pricingTableDataV2.find((item) => item.title === plan).memory}%` }}
+                  style={{
+                    width: `${
+                      1200 /
+                      pricingTableDataV2.find((item) => item.title === plan)
+                        .memory
+                    }%`,
+                  }}
                 ></div>
               </div>
             </div>
@@ -301,8 +340,17 @@ const SettingsPreview = ({ toggleScreenLg }) => {
         </div>
       </Block>
 
-      <Modal isOpen={modal} className="modal-dialog-centered" size="lg" toggle={() => setModal(false)}>
-        <ProfileUpdate formData={formData} setFormData={setFormData} setModal={setModal}></ProfileUpdate>
+      <Modal
+        isOpen={modal}
+        className="modal-dialog-centered"
+        size="lg"
+        toggle={() => setModal(false)}
+      >
+        <ProfileUpdate
+          formData={formData}
+          setFormData={setFormData}
+          setModal={setModal}
+        ></ProfileUpdate>
       </Modal>
     </React.Fragment>
   );

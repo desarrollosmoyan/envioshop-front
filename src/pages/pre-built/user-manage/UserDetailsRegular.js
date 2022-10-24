@@ -196,16 +196,18 @@ const UserDetailsPage = ({ match }) => {
                             </span>
                           </div>
                         </div>
-                        <div className="profile-ud-item">
-                          <div className="profile-ud wider">
-                            <span className="profile-ud-label">
-                              Numero de Teléfono
-                            </span>
-                            <span className="profile-ud-value">
-                              {user.cellphone}
-                            </span>
+                        {location.type === "franchise" ? (
+                          <div className="profile-ud-item">
+                            <div className="profile-ud wider">
+                              <span className="profile-ud-label">
+                                Numero de Teléfono
+                              </span>
+                              <span className="profile-ud-value">
+                                {user.cellphone}
+                              </span>
+                            </div>
                           </div>
-                        </div>
+                        ) : null}
                         <div className="profile-ud-item">
                           <div className="profile-ud wider">
                             <span className="profile-ud-label">
@@ -245,14 +247,18 @@ const UserDetailsPage = ({ match }) => {
                             <span className="profile-ud-value">Email</span>
                           </div>
                         </div>
-                        <div className="profile-ud-item">
-                          <div className="profile-ud wider">
-                            <span className="profile-ud-label">Ubicación</span>
-                            <span className="profile-ud-value">
-                              {user.ubication}
-                            </span>
+                        {location.type === "franchise" ? (
+                          <div className="profile-ud-item">
+                            <div className="profile-ud wider">
+                              <span className="profile-ud-label">
+                                Ubicación
+                              </span>
+                              <span className="profile-ud-value">
+                                {user.ubication}
+                              </span>
+                            </div>
                           </div>
-                        </div>
+                        ) : null}
                       </div>
                     </Block>
 

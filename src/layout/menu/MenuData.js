@@ -644,49 +644,52 @@ const menu = [
     text: "Tablero",
     link: "/",
     newTab: false,
-    role: ["admin"],
+    role: { admin: true, franchise: false, cashier: false },
   },
   {
     icon: "user-list-fill",
     text: "Usuarios",
     link: "/users",
-    role: ["admin", "franchise"],
+    role: { admin: true, franchise: true, cashier: false },
     subMenu: [
       {
         text: "Franquicias",
         icon: "building-fill",
         link: "/users/franchises",
-        role: ["admin"],
+        role: { admin: true, franchise: false, cashier: false },
       },
       {
         text: "Cajeros",
         icon: "user-alt-fill",
         link: "/users/cashiers",
-        role: ["admin", "franchise"],
+        role: { admin: true, franchise: true, cashier: false },
       },
     ],
     newTab: false,
   },
-  {
+  /* {
     icon: "file-docs",
     text: "Informes",
     link: "/reports",
-  },
+    role: { admin: true, franchise: false, cashier: false },
+  }*/
   {
     icon: "truck",
     text: "Gestión de envios",
     link: "/shipments",
-    role: ["admin", "cashier"],
+    role: { admin: true, franchise: true, cashier: true },
     subMenu: [
       {
         text: "POS",
         icon: "sign-mxn",
         link: "/shipments/pos",
+        role: { admin: true, franchise: false, cashier: true },
       },
       {
         text: "Envios",
         icon: "building-fill",
         link: "/shipments/managment",
+        role: { admin: true, franchise: false, cashier: false },
       },
     ],
   },
@@ -694,6 +697,7 @@ const menu = [
     icon: "setting-alt-fill",
     text: "Ajustes",
     link: "/settings",
+    role: { admin: true, franchise: false, cashier: false },
   },
 ];
 export default menu;

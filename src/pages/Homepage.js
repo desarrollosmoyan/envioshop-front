@@ -30,9 +30,19 @@ import {
   DefaultRevenueChart,
   DefaultVisitorChart,
 } from "../components/partials/charts/default/DefaultCharts";
-
+import useUser from "../hooks/useUser";
+import { useEffect } from "react";
+import useShipment from "../hooks/useShipment";
 const Homepage = () => {
   const [sm, updateSm] = useState(false);
+  const franchise = useUser("franchise");
+  const shipment = useShipment();
+  const [franchisesList, setFranchisesList] = useState([]);
+  const [shipmentsList, setShipmentsList] = useState([]);
+  useEffect(() => {
+    franchise.getAll(setFranchisesList);
+    shipment.getAll([0, 50], setShipmentsList);
+  }, []);
   return (
     <React.Fragment>
       <Head title="Homepage"></Head>
@@ -152,7 +162,7 @@ const Homepage = () => {
                 percentChange={"4.63"}
                 up={true}
                 chart={<DefaultCustomerChart />}
-                amount={"847"}
+                amount={franchisesList.length}
               />
             </Col>
             <Col xxl="3" sm="6">

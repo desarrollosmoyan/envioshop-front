@@ -1,26 +1,27 @@
-import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
 import {
   Modal,
-  ModalHeader,
   ModalBody,
-  Form,
-  Col,
-  Row,
+  ModalHeader,
   ModalFooter,
+  Row,
+  Col,
 } from "reactstrap";
-import { Button } from "../../components/Component";
-import Input from "../../components/input/input/Input";
-import { toast } from "react-toastify";
-import { useState } from "react";
-import useTurn from "../../hooks/useTurn";
+import { useState, useEffect } from "react";
 import axios from "axios";
-export default function PosModalForm() {
-  const { assign } = useTurn();
+import useTurn from "../../hooks/useTurn";
+import { Form } from "reactstrap";
+import Input from "../input/input/Input";
+import { Button } from "reactstrap";
+import { toast } from "react-toastify";
+import { useForm } from "react-hook-form";
+import { useSelector } from "react-redux";
+const CoinModal = ({ open, setOpen }) => {
+  const { assign, end, update } = useTurn();
+  const selected = useSelector((state) => state.rating.selected);
+  //Cambiar por cookie
   const cashierId = JSON.parse(localStorage.getItem("userData")).id;
-  const [open, setOpen] = useState(true);
+  const [coins, setCoins] = useState({ coin10: 0, coin20: 0, coin30: 0 });
+  const [bills, setBills] = useState({ bill10: 0, bill20: 0, bill30: 0 });
   useEffect(() => {
     checkIfCashierHasTurn();
   }, []);
@@ -60,7 +61,13 @@ export default function PosModalForm() {
         bill30: formData.bill30,
       },
     };
-    assign(cashierId, openBalance)
+    if (
+      total < parseFloat(selected.prices.total) ||
+      total === parseFloat(selected.prices.total)
+    ) {
+      console.log("pepe");
+    }
+    /*assign(cashierId, openBalance)
       .then(() => {
         toast("Turno creado con éxito!", { type: "success" });
         setOpen(false);
@@ -69,16 +76,49 @@ export default function PosModalForm() {
         toast("Algo ha salido mal. Vuelve ha intentarlo más tarde", {
           type: "error",
         })
-      );
+      );*/
   };
-  const calculateTotal = (e) => {
-    const values = getValues();
-    const filteredValues = Object.values(values).filter((item) => !isNaN(item));
-    const sum = Object.values(filteredValues).reduce(
+
+  useEffect(() => {
+    calculateTotal();
+  }, [coins, bills]);
+  const calculateTotal = () => {
+    console.log(coins);
+    const coinSum = Object.values(coins).reduce(
       (prev, current) => prev + current,
       0
     );
-    setTotal(sum);
+    const billSum = Object.values(bills).reduce(
+      (prev, current) => prev + current,
+      0
+    );
+    if (isNaN(coinSum)) return;
+    setTotal((coinSum + billSum).toFixed(2));
+  };
+
+  const sumCoins = (e) => {
+    const name = e.target.name;
+    const values = name.length > 0 ? getValues()[name] : null;
+    if (!values || isNaN(values)) {
+      setCoins({ ...coins, [name]: 0 });
+      return;
+    }
+    console.log(values);
+    const coeficient = parseInt(name.replace("coin", "")) / 10;
+    const res = (values * coeficient) / 100;
+    setCoins({ ...coins, [name]: res });
+  };
+
+  const sumBills = (e) => {
+    const name = e.target.name;
+    const values = name.length > 0 ? getValues()[name] : null;
+    if (!values || isNaN(values)) {
+      setBills({ ...bills, [name]: 0 });
+      return;
+    }
+    const coeficient = parseInt(name.replace("bill", "")) / 10;
+    const res = values * coeficient * 10;
+    setBills({ ...bills, [name]: res });
   };
   return (
     <Modal isOpen={open}>
@@ -87,6 +127,9 @@ export default function PosModalForm() {
       </ModalHeader>
       <Form onSubmit={handleSubmit(onHandleSubmit)}>
         <ModalBody>
+          <Row className="pl-2 mb-2">
+            <h5>Valor: {selected.prices.total} MXN</h5>
+          </Row>
           <Row>
             <Col>
               <label className="form-label">Monedas</label>
@@ -106,7 +149,7 @@ export default function PosModalForm() {
                   valueAsNumber: true,
                 })}
                 min="0"
-                onChange={calculateTotal}
+                onChange={sumCoins}
                 text="10"
               />
             </Col>
@@ -120,7 +163,7 @@ export default function PosModalForm() {
                   valueAsNumber: true,
                 })}
                 min="0"
-                onChange={calculateTotal}
+                onChange={sumBills}
                 text="10"
               />
             </Col>
@@ -131,7 +174,7 @@ export default function PosModalForm() {
                 errors={errors}
                 id="coin20"
                 type="number"
-                onChange={calculateTotal}
+                onChange={sumCoins}
                 ref={register({
                   required: "Este campo es requerido",
                   valueAsNumber: true,
@@ -147,7 +190,7 @@ export default function PosModalForm() {
                 type="number"
                 min="0"
                 text="20"
-                onChange={calculateTotal}
+                onChange={sumBills}
                 ref={register({
                   required: "Este campo es requerido",
                   valueAsNumber: true,
@@ -163,7 +206,7 @@ export default function PosModalForm() {
                 type="number"
                 min="0"
                 text="30"
-                onChange={calculateTotal}
+                onChange={sumCoins}
                 ref={register({
                   required: "Este campo es requerido",
                   valueAsNumber: true,
@@ -176,7 +219,7 @@ export default function PosModalForm() {
                 id="bill30"
                 type="number"
                 min="0"
-                onChange={calculateTotal}
+                onChange={sumBills}
                 text="30"
                 ref={register({
                   required: "Este campo es requerido",
@@ -188,9 +231,12 @@ export default function PosModalForm() {
         </ModalBody>
         <ModalFooter>
           <Row className=" mt-2 align-items-center justify-content-between  w-100">
-            <Col>
+            <Col className="d-flex flex-column">
               <span>
-                Cantidad de dinero: <span>{total}</span>
+                Total: <span>{total}</span>
+              </span>
+              <span>
+                Cambio: <span>{total}</span>
               </span>
             </Col>
             <Button
@@ -199,7 +245,7 @@ export default function PosModalForm() {
               color="primary"
               className="d-flex align-items-center"
             >
-              Abrir Turno
+              Pagar
               <em className="icon ni ni-caret-right-fill"></em>
             </Button>
           </Row>
@@ -207,4 +253,6 @@ export default function PosModalForm() {
       </Form>
     </Modal>
   );
-}
+};
+
+export default CoinModal;

@@ -13,11 +13,11 @@ const Input = forwardRef(
       errors = null,
       text = null,
       name = null,
+      setValue,
       ...props
     },
-    ref = null
+    ref
   ) => {
-    console.log(id, label.length);
     return (
       <FormGroup className={`mb-2 col  ${containerClassName}`}>
         {label.length !== 0 ? (
@@ -40,8 +40,8 @@ const Input = forwardRef(
               placeholder={placeholder}
               {...props}
             />
-            <div class="input-group-prepend">
-              <div class="input-group-text">{text}</div>
+            <div className="input-group-prepend">
+              <div className="input-group-text">{text}</div>
             </div>
           </div>
         ) : (

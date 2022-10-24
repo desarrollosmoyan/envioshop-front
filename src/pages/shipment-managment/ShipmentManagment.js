@@ -10,12 +10,52 @@ import {
   Block,
 } from "../../components/Component";
 import useAxios from "../../hooks/useAxios";
+import { defaultShipmentData } from "../../constants";
+import useShipment from "../../hooks/useShipment";
+import { ReactDataTable } from "../../components/Component";
+import { useEffect, useState } from "react";
 export default function ShipmentManagment() {
-  const {
-    responseData: shipmentsList,
-    error,
-    isLoading,
-  } = useAxios({ url: "", initialData: [], method: "GET" });
+  const { getAll } = useShipment();
+
+  const columns = [
+    {
+      name: "Empresa",
+      selector: (row) => row.serviceName,
+    },
+    {
+      name: "Servicio",
+      selector: (row) => row.serviceType,
+    },
+    {
+      name: "Precio",
+      selector: (row) => row.shipmentPrice,
+    },
+    {
+      name: "Franquicia",
+      selector: (row) => row.franchise.name,
+    },
+    {
+      name: "Cajero",
+      selector: (row) => row.Turn.cashier.name,
+    },
+    {
+      name: "Fecha y Hora",
+      selector: (row) => new Date(row.createdAt).toLocaleString(),
+    },
+  ];
+  const [cols, setCols] = useState(columns);
+  const [sales, setSalesList] = useState([]);
+  useEffect(() => {
+    getAll([0, 20], setSalesList);
+  }, []);
+  const keyMap = {
+    serviceName: "Empresa",
+    serviceType: "Servicio",
+    price: "Precio",
+    franchise: "Franquicia",
+    cashier: "Cajero",
+    createdAt: "Fecha y Hora",
+  };
   return (
     <>
       <Head title="Gestión de envios" />
@@ -34,12 +74,16 @@ export default function ShipmentManagment() {
           </BlockBetween>
         </BlockHead>
         <Block>
-          {/*<ReactDataTable
-            data={responseData}
-            columns={dataTableColumns}
-            expandableRows
-            pagination
-  />*/}
+          {sales.length !== 0 ? (
+            <ReactDataTable
+              keyMap={keyMap}
+              data={sales}
+              columns={cols}
+              expandableRows
+              pagination
+              actions
+            />
+          ) : null}
         </Block>
       </Content>
     </>
