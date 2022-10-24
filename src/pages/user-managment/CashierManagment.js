@@ -70,7 +70,7 @@ const CashierManagment = () => {
 
   const getMe = async () => {
     try {
-      const resp = await axios.get("http://localhost:5000/me", {
+      const resp = await axios.get("${process.env.REACT_APP_API_URL}/me", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

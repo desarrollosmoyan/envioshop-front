@@ -3,7 +3,7 @@ import { useCookie } from "react-use";
 const useUser = (type) => {
   const [token] = useCookie("token");
   const request = axios.create({
-    baseURL: `http://localhost:5000/user/${type}`,
+    baseURL: `${process.env.REACT_APP_API_URL}/user/${type}`,
     headers: {
       Authorization: token,
     },

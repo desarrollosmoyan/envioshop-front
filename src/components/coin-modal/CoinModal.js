@@ -28,7 +28,7 @@ const CoinModal = ({ open, setOpen }) => {
   const checkIfCashierHasTurn = async () => {
     const { data } = await axios({
       method: "GET",
-      url: `http://localhost:5000/user/cashier/${cashierId}`,
+      url: `${process.env.REACT_APP_API_URL}/user/cashier/${cashierId}`,
     });
     if (data.Turn) {
       setOpen(false);

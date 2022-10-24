@@ -34,7 +34,10 @@ const Login = () => {
   const onFormSubmit = async (formData) => {
     setLoading(true);
     try {
-      const { data } = await axios.post(API_ENDPOINTS.auth.signin, formData);
+      const { data } = await axios.post(
+        `${process.env.REACT_APP_API_URL}${API_ENDPOINTS.auth.signin}`,
+        formData
+      );
       setToken(data.token);
       dispatch(setUser(data.user));
       localStorage.setItem("type", data.user.type);

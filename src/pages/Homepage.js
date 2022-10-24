@@ -33,16 +33,33 @@ import {
 import useUser from "../hooks/useUser";
 import { useEffect } from "react";
 import useShipment from "../hooks/useShipment";
+import { toast, ToastContainer } from "react-toastify";
+import axios from "axios";
+import { useCookie } from "react-use";
 const Homepage = () => {
   const [sm, updateSm] = useState(false);
-  const franchise = useUser("franchise");
-  const shipment = useShipment();
-  const [franchisesList, setFranchisesList] = useState([]);
-  const [shipmentsList, setShipmentsList] = useState([]);
+  const [token] = useCookie("token");
+  const [stats, setStats] = useState({});
   useEffect(() => {
-    franchise.getAll(setFranchisesList);
-    shipment.getAll([0, 50], setShipmentsList);
+    getStats();
   }, []);
+  console.log(stats);
+
+  const getStats = async () => {
+    try {
+      const url = `${process.env.REACT_APP_API_URL}/stats`;
+      const { data } = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(data);
+      setStats(data);
+    } catch (error) {
+      toast("Algo salió mal!", { type: "error" });
+      setStats(null);
+    }
+  };
   return (
     <React.Fragment>
       <Head title="Homepage"></Head>
@@ -80,8 +97,8 @@ const Homepage = () => {
                             name="calender-date"
                           />
                           <span>
-                            <span className="d-none d-md-inline">Last</span> 30
-                            Days
+                            <span className="d-none d-md-inline">Ultimos</span>{" "}
+                            30 Dias
                           </span>
                           <Icon className="dd-indc" name="chevron-right" />
                         </DropdownToggle>
@@ -95,7 +112,7 @@ const Homepage = () => {
                                 }}
                                 href="#!"
                               >
-                                <span>Last 30 days</span>
+                                <span>Ultimos 30 Días</span>
                               </DropdownItem>
                             </li>
                             <li>
@@ -106,7 +123,7 @@ const Homepage = () => {
                                 }}
                                 href="#dropdownitem"
                               >
-                                <span>Last 6 months</span>
+                                <span>Ultimos 6 Meses</span>
                               </DropdownItem>
                             </li>
                             <li>
@@ -117,18 +134,12 @@ const Homepage = () => {
                                 }}
                                 href="#dropdownitem"
                               >
-                                <span>Last 3 weeks</span>
+                                <span>Ultimas 3 Semanas</span>
                               </DropdownItem>
                             </li>
                           </ul>
                         </DropdownMenu>
                       </UncontrolledDropdown>
-                    </li>
-                    <li className="nk-block-tools-opt">
-                      <Button color="primary">
-                        <Icon name="reports" />
-                        <span>Reports</span>
-                      </Button>
                     </li>
                   </ul>
                 </div>
@@ -141,19 +152,19 @@ const Homepage = () => {
             <Col xxl="3" sm="6">
               <DataCard
                 title="Total de Envios"
-                percentChange={"4.63"}
+                percentChange={4}
                 up={true}
                 chart={<DefaultOrderChart />}
-                amount={"1975"}
+                amount={stats ? stats.totalShipments : 0}
               />
             </Col>
             <Col xxl="3" sm="6">
               <DataCard
                 title="Total vendido"
-                percentChange={"2.63"}
+                percentChange={3}
                 up={false}
                 chart={<DefaultRevenueChart />}
-                amount={"$2293"}
+                amount={`$${stats ? stats.totalEarned : 0}`}
               />
             </Col>
             <Col xxl="3" sm="6">
@@ -162,16 +173,16 @@ const Homepage = () => {
                 percentChange={"4.63"}
                 up={true}
                 chart={<DefaultCustomerChart />}
-                amount={franchisesList.length}
+                amount={stats ? stats.totalFranchises : 0}
               />
             </Col>
             <Col xxl="3" sm="6">
               <DataCard
-                title="Today's Visitors"
-                percentChange={"2.63"}
-                up={false}
-                chart={<DefaultVisitorChart />}
-                amount={"23,485"}
+                title="Cajeros registrados"
+                percentChange={"4.63"}
+                up={true}
+                chart={<DefaultCustomerChart />}
+                amount={stats ? stats.totalCashiers : 0}
               />
             </Col>
             <Col xxl="6">
@@ -184,7 +195,7 @@ const Homepage = () => {
               <StoreStatistics />
             </Col>
             <Col xxl="8">
-              <h1>Envios recientes</h1>
+              <h3>Envios recientes</h3>
               <RecentOrders />
             </Col>
             <Col xxl="4" md="8" lg="6">

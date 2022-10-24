@@ -1,7 +1,7 @@
 import axios from "axios";
 const useTurn = () => {
   const request = axios.create({
-    baseURL: "http://localhost:5000/turn",
+    baseURL: `${process.env.REACT_APP_API_URL}/turn`,
   });
   const assign = async (cashierId, balance, set = null) => {
     try {

@@ -28,11 +28,14 @@ const User = () => {
   }, []);
   const getUser = async (token) => {
     try {
-      const { data } = await axios.get("http://localhost:5000/user", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const { data } = await axios.get(
+        `${process.env.REACT_APP_API_URL}/user`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       dispatch(setUser(data.user));
     } catch (error) {
       console.log("error", error);

@@ -5,7 +5,7 @@ import ESTAFETALOGO from "./assets/images/services/estafeta.svg";
 import PAQUETEEXPRESSLOGO from "./assets/images/services/paquetexpress.svg";
 import REDPACKLOGO from "./assets/images/services/redpack.svg";
 export const API_ENDPOINTS = {
-  baseUrl: "http://localhost:5000",
+  baseUrl: process.env.REACT_APP_API_URL,
   auth: {
     signin: "/auth/signin",
     signup: "/auth/signup",
