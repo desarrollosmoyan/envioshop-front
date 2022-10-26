@@ -1,6 +1,6 @@
-import React from "react";
-import Head from "../../layout/head/Head";
-import Content from "../../layout/content/Content";
+import React from 'react';
+import Head from '../../layout/head/Head';
+import Content from '../../layout/content/Content';
 import {
   BlockBetween,
   BlockHead,
@@ -8,44 +8,44 @@ import {
   BlockTitle,
   BlockDes,
   Block,
-} from "../../components/Component";
-import useAxios from "../../hooks/useAxios";
-import { defaultShipmentData } from "../../constants";
-import useShipment from "../../hooks/useShipment";
-import { ReactDataTable } from "../../components/Component";
-import { useEffect, useState } from "react";
-import { Button } from "reactstrap";
+} from '../../components/Component';
+import useAxios from '../../hooks/useAxios';
+import { defaultShipmentData } from '../../constants';
+import useShipment from '../../hooks/useShipment';
+import { ReactDataTable } from '../../components/Component';
+import { useEffect, useState } from 'react';
+import { Button } from 'reactstrap';
 export default function ShipmentManagment() {
   const { getAll } = useShipment();
 
   const columns = [
     {
-      name: "Empresa",
-      selector: (row) => row.serviceName,
+      name: 'Empresa',
+      selector: (row) => row?.serviceName,
     },
     {
-      name: "Servicio",
-      selector: (row) => row.serviceType,
+      name: 'Servicio',
+      selector: (row) => row?.serviceType,
     },
     {
-      name: "Precio",
-      selector: (row) => row.shipmentPrice,
+      name: 'Precio',
+      selector: (row) => row?.shipmentPrice,
     },
     {
-      name: "Franquicia",
-      selector: (row) => row.franchise.name,
+      name: 'Franquicia',
+      selector: (row) => row?.franchise?.name,
     },
     {
-      name: "Cajero",
-      selector: (row) => row.Turn.cashier.name,
+      name: 'Cajero',
+      selector: (row) => row?.Turn?.cashier?.name,
     },
     {
-      name: "Fecha y Hora",
+      name: 'Fecha y Hora',
       selector: (row) => new Date(row.createdAt).toLocaleString(),
       sortable: true,
     },
     {
-      name: "Documento",
+      name: 'Documento',
       cell: (row) => (
         <a
           download={`Documento-Envio-${new Date(
@@ -57,7 +57,7 @@ export default function ShipmentManagment() {
           <Button color="primary">Descargar PDF</Button>
         </a>
       ),
-      selector: (row) => "Descargar Documento",
+      selector: (row) => 'Descargar Documento',
     },
   ];
 
@@ -70,12 +70,12 @@ export default function ShipmentManagment() {
     getAll([0, 20], setSalesList);
   }, []);
   const keyMap = {
-    serviceName: "Empresa",
-    serviceType: "Servicio",
-    price: "Precio",
-    franchise: "Franquicia",
-    cashier: "Cajero",
-    createdAt: "Fecha y Hora",
+    serviceName: 'Empresa',
+    serviceType: 'Servicio',
+    price: 'Precio',
+    franchise: 'Franquicia',
+    cashier: 'Cajero',
+    createdAt: 'Fecha y Hora',
   };
   return (
     <>
