@@ -21,23 +21,23 @@ export default function ShipmentManagment() {
   const columns = [
     {
       name: "Empresa",
-      selector: (row) => row.serviceName,
+      selector: (row) => row?.serviceName,
     },
     {
       name: "Servicio",
-      selector: (row) => row.serviceType,
+      selector: (row) => row?.serviceType,
     },
     {
       name: "Precio",
-      selector: (row) => row.shipmentPrice,
+      selector: (row) => row?.shipmentPrice,
     },
     {
       name: "Franquicia",
-      selector: (row) => row.franchise.name,
+      selector: (row) => row?.franchise?.name,
     },
     {
       name: "Cajero",
-      selector: (row) => row.Turn.cashier.name,
+      selector: (row) => row?.Turn.cashier?.name,
     },
     {
       name: "Fecha y Hora",

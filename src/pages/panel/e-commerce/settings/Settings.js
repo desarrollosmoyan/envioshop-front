@@ -48,7 +48,7 @@ const Settings = () => {
                         type="text"
                         className="form-control"
                         id="site-name"
-                        defaultValue="My Store"
+                        defaultValue="https://express.api.dhl.com/mydhlapi/test"
                       />
                     </div>
                   </FormGroup>
@@ -70,7 +70,7 @@ const Settings = () => {
                         type="text"
                         className="form-control"
                         id="site-email"
-                        defaultValue="info@softnio.com"
+                        defaultValue="https://apis.fedex.com"
                       />
                     </div>
                   </FormGroup>
@@ -112,7 +112,7 @@ const Settings = () => {
                         type="text"
                         className="form-control"
                         id="site-copyright"
-                        defaultValue="&copy; 2019, DashLite. All Rights Reserved."
+                        defaultValue="https://wwwcie.ups.com"
                       />
                     </div>
                   </FormGroup>
@@ -122,7 +122,7 @@ const Settings = () => {
                 <Col lg="5" className="offset-lg-5">
                   <FormGroup className="mt-2">
                     <Button size="lg" color="primary" type="submit">
-                      Update
+                      Actualizar
                     </Button>
                   </FormGroup>
                 </Col>
