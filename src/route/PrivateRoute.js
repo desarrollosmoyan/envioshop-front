@@ -1,5 +1,6 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
+import { useCookie } from "react-use";
 
 const PrivateRoute = ({
   roleTypeAllowed,
@@ -7,8 +8,11 @@ const PrivateRoute = ({
   component: Component,
   ...rest
 }) => {
-  const auth = localStorage.getItem("accessToken");
-  const roleType = JSON.parse(localStorage.getItem("userData")).type;
+  const [token] = useCookie("token");
+  const roleType = localStorage.getItem("type")
+    ? localStorage.getItem("type")
+    : "";
+  console.log(roleType);
   let isAllowed =
     roleTypeAllowed instanceof Array
       ? roleTypeAllowed.includes(roleType)
@@ -22,11 +26,13 @@ const PrivateRoute = ({
       exact={exact ? true : false}
       rest
       render={(props) =>
-        !isAllowed ? (
+        roleType === "" ? (
+          <Redirect to={`${process.env.PUBLIC_URL}/auth-login`} />
+        ) : !isAllowed ? (
           <Redirect
             to={`${process.env.PUBLIC_URL}/errors/404-modern`}
           ></Redirect>
-        ) : auth ? (
+        ) : token ? (
           <Component {...props} {...rest}></Component>
         ) : (
           <Redirect to={`${process.env.PUBLIC_URL}/auth-login`}></Redirect>

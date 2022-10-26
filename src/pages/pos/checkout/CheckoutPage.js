@@ -22,8 +22,7 @@ export default function CheckoutPage({ setPage }) {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const shipping = useSelector((state) => state.shipping.data);
-  const values = watch();
-  console.log(values);
+
   useEffect(() => {
     if (shipping) {
       setValue("shipperFullName", shipping.shipperFullName);
@@ -55,7 +54,6 @@ export default function CheckoutPage({ setPage }) {
     }
   }, []);
   const handleFirstPageSubmit = (formData) => {
-    console.log(formData);
     dispatch(
       setShipping({
         data: {

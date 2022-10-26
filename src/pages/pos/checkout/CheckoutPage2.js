@@ -19,7 +19,6 @@ export default function CheckoutPage2({ setPage, company }) {
   const dispatch = useDispatch();
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
-  console.log(selected);
   useEffect(() => {
     if (shipping) {
       setValue("receiverFullName", shipping.receiverFullName);

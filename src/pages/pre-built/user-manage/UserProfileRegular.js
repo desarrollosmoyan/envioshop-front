@@ -18,10 +18,20 @@ import {
 import { countryOptions, userData } from "./UserData";
 import { getDateStructured } from "../../../utils/Utils";
 import { useSelector } from "react-redux";
+import axios from "axios";
+import { request } from "../../../constants";
+import { useCookie } from "react-use";
 const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
   const user = useSelector((state) => state.user);
   const [modalTab, setModalTab] = useState("1");
-  const [userInfo, setUserInfo] = useState(userData[0]);
+  const [token] = useCookie("token");
+  const [userData, setUserData] = useState({
+    name: "",
+    email: "",
+    franchise: {
+      name: "",
+    },
+  });
   const [formData, setFormData] = useState({
     name: "Abu Bin Ishtiak",
     displayName: "Ishtiak",
@@ -33,7 +43,29 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
     country: "Canada",
   });
   const [modal, setModal] = useState(false);
+  const typeMap = {
+    cashier: "Cajero",
+    franchise: "Franquicia",
+    admin: "Admin",
+  };
 
+  useEffect(() => {
+    getMe();
+  }, []);
+  const getMe = async () => {
+    try {
+      const { data } = await request({
+        method: "GET",
+        url: "/me",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setUserData(data.user);
+    } catch (error) {
+      setUserData(user);
+    }
+  };
   useEffect(() => {
     setProfileName(formData.name);
   }, [formData, setProfileName]);
@@ -46,10 +78,9 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
     let submitData = {
       ...formData,
     };
-    setUserInfo(submitData);
+    setUserData(submitData);
     setModal(false);
   };
-
   return (
     <React.Fragment>
       <Head title="User List - Profile"></Head>
@@ -82,7 +113,7 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
           <div className="data-item" onClick={() => setModal(true)}>
             <div className="data-col">
               <span className="data-label">Nombre completo</span>
-              <span className="data-value">{user.name}</span>
+              <span className="data-value">{userData.name}</span>
             </div>
             <div className="data-col data-col-end">
               <span className="data-more">
@@ -93,18 +124,20 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
           <div className="data-item" onClick={() => setModal(true)}>
             <div className="data-col">
               <span className="data-label">Rol</span>
-              <span className="data-value">{userInfo.displayName}</span>
+              <span className="data-value text-soft">
+                {typeMap[userData.type]}
+              </span>
             </div>
             <div className="data-col data-col-end">
               <span className="data-more">
-                <Icon name="forward-ios"></Icon>
+                <Icon name="lock-alt"></Icon>
               </span>
             </div>
           </div>
           <div className="data-item">
             <div className="data-col">
               <span className="data-label">Email</span>
-              <span className="data-value">info@softnio.com</span>
+              <span className="data-value text-soft">{user.email}</span>
             </div>
             <div className="data-col data-col-end">
               <span className="data-more disable">
@@ -116,7 +149,24 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
             <div className="data-item" onClick={() => setModal(true)}>
               <div className="data-col">
                 <span className="data-label">Franquicia</span>
-                <span className="data-value text-soft">{userInfo.phone}</span>
+                <span className="data-value text-soft">
+                  {userData.franchise.name}
+                </span>
+              </div>
+              <div className="data-col data-col-end">
+                <span className="data-more">
+                  <Icon name="lock-alt"></Icon>
+                </span>
+              </div>
+            </div>
+          ) : null}
+          {userData.type === "franchise" ? (
+            <div className="data-item" onClick={() => setModal(true)}>
+              <div className="data-col">
+                <span className="data-label">Número de teléfono</span>
+                <span className="data-value text-soft">
+                  {userData.cellphone}
+                </span>
               </div>
               <div className="data-col data-col-end">
                 <span className="data-more">
@@ -124,33 +174,24 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
                 </span>
               </div>
             </div>
-          ) : null}
-          <div className="data-item" onClick={() => setModal(true)}>
-            <div className="data-col">
-              <span className="data-label">Número de teléfono</span>
-              <span className="data-value text-soft">{userInfo.phone}</span>
+          ) : (
+            <></>
+          )}
+          {userData.type === "franchise" ? (
+            <div className="data-item" onClick={() => setModal(true)}>
+              <div className="data-col">
+                <span className="data-label">Ubicación</span>
+                <span className="data-value">{userData.ubication}</span>
+              </div>
+              <div className="data-col data-col-end">
+                <span className="data-more">
+                  <Icon name="forward-ios"></Icon>
+                </span>
+              </div>
             </div>
-            <div className="data-col data-col-end">
-              <span className="data-more">
-                <Icon name="forward-ios"></Icon>
-              </span>
-            </div>
-          </div>
-          <div className="data-item" onClick={() => setModal(true)}>
-            <div className="data-col">
-              <span className="data-label">Ubicación</span>
-              <span className="data-value">
-                {userInfo.address},
-                <br />
-                {userInfo.state}, {userInfo.country}
-              </span>
-            </div>
-            <div className="data-col data-col-end">
-              <span className="data-more">
-                <Icon name="forward-ios"></Icon>
-              </span>
-            </div>
-          </div>
+          ) : (
+            <></>
+          )}
         </div>
       </Block>
 
@@ -172,7 +213,7 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
             <Icon name="cross-sm"></Icon>
           </a>
           <div className="p-2">
-            <h5 className="title">Update Profile</h5>
+            <h5 className="title">Editar Perfil</h5>
             <ul className="nk-nav nav nav-tabs">
               <li className="nav-item">
                 <a
@@ -187,16 +228,18 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
                 </a>
               </li>
               <li className="nav-item">
-                <a
-                  className={`nav-link ${modalTab === "2" && "active"}`}
-                  onClick={(ev) => {
-                    ev.preventDefault();
-                    setModalTab("2");
-                  }}
-                  href="#address"
-                >
-                  Address
-                </a>
+                {userData.type === "franchise" ? (
+                  <a
+                    className={`nav-link ${modalTab === "2" && "active"}`}
+                    onClick={(ev) => {
+                      ev.preventDefault();
+                      setModalTab("2");
+                    }}
+                    href="#address"
+                  >
+                    Ubicación
+                  </a>
+                ) : null}
               </li>
             </ul>
             <div className="tab-content">
@@ -208,7 +251,7 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
                   <Col md="6">
                     <FormGroup>
                       <label className="form-label" htmlFor="full-name">
-                        Full Name
+                        Nombre Completo
                       </label>
                       <input
                         type="text"
@@ -221,73 +264,8 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
                       />
                     </FormGroup>
                   </Col>
-                  <Col md="6">
-                    <FormGroup>
-                      <label className="form-label" htmlFor="display-name">
-                        Display Name
-                      </label>
-                      <input
-                        type="text"
-                        id="display-name"
-                        className="form-control"
-                        name="displayName"
-                        onChange={(e) => onInputChange(e)}
-                        defaultValue={formData.displayName}
-                        placeholder="Enter display name"
-                      />
-                    </FormGroup>
-                  </Col>
-                  <Col md="6">
-                    <FormGroup>
-                      <label className="form-label" htmlFor="phone-no">
-                        Phone Number
-                      </label>
-                      <input
-                        type="number"
-                        id="phone-no"
-                        className="form-control"
-                        name="phone"
-                        onChange={(e) => onInputChange(e)}
-                        defaultValue={formData.phone}
-                        placeholder="Phone Number"
-                      />
-                    </FormGroup>
-                  </Col>
-                  <Col md="6">
-                    <FormGroup>
-                      <label className="form-label" htmlFor="birth-day">
-                        Date of Birth
-                      </label>
-                      <DatePicker
-                        selected={new Date(formData.dob)}
-                        className="form-control"
-                        onChange={(date) =>
-                          setFormData({
-                            ...formData,
-                            dob: getDateStructured(date),
-                          })
-                        }
-                        maxDate={new Date()}
-                      />
-                    </FormGroup>
-                  </Col>
                   <Col size="12">
-                    <div className="custom-control custom-switch">
-                      <input
-                        type="checkbox"
-                        className="custom-control-input form-control"
-                        id="latest-sale"
-                      />
-                      <label
-                        className="custom-control-label"
-                        htmlFor="latest-sale"
-                      >
-                        Use full name to display{" "}
-                      </label>
-                    </div>
-                  </Col>
-                  <Col size="12">
-                    <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
+                    <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2 mt-3">
                       <li>
                         <Button
                           color="primary"
@@ -297,10 +275,10 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
                             submitForm();
                           }}
                         >
-                          Update Profile
+                          Confirmar edición
                         </Button>
                       </li>
-                      <li>
+                      <li className="ml-3">
                         <a
                           href="#dropdownitem"
                           onClick={(ev) => {
@@ -309,7 +287,7 @@ const UserProfileRegularPage = ({ sm, updateSm, setProfileName }) => {
                           }}
                           className="link link-light"
                         >
-                          Cancel
+                          Cancelar
                         </a>
                       </li>
                     </ul>

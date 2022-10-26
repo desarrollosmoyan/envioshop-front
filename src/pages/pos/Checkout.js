@@ -14,13 +14,15 @@ import Content from "../../layout/content/Content";
 import { Button, Col, Row } from "reactstrap";
 import CheckoutPage3 from "./checkout/CheckoutPage3";
 import CoinModal from "../../components/coin-modal/CoinModal";
+import { Redirect } from "react-router";
 
 export default function Checkout() {
   const service = useSelector((state) => state.rating.selected);
   const pdf = useSelector((state) => state.pdf.data);
   const [open, setOpen] = useState(false);
-  console.log(pdf);
   const [page, setPage] = useState(1);
+  if (!service)
+    return <Redirect to={`${process.env.PUBLIC_URL}/shipments/pos`}></Redirect>;
   return (
     <div className="vh-100">
       <Head title="Checkout" />
@@ -86,7 +88,12 @@ export default function Checkout() {
                 ></iframe>
                 <Row className="mt-3">
                   <Col>
-                    <Button color="info">Imprimir</Button>
+                    <a
+                      href={`data:application/pdf;base64,${pdf}`}
+                      download={"Documento"}
+                    >
+                      <Button color="info">Imprimir</Button>
+                    </a>
                   </Col>
                   <Col className="d-flex justify-content-end">
                     <Button

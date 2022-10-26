@@ -14,12 +14,36 @@ import {
   DropdownMenu,
   DropdownToggle,
 } from "reactstrap";
+import { request } from "../../../constants";
+import { useCookie } from "react-use";
 
 const UserProfileLayout = () => {
   const [sm, updateSm] = useState(false);
+  const [token] = useCookie("token");
   const [mobileView, setMobileView] = useState(false);
   const [profileName, setProfileName] = useState("Abu Bin Ishtiak");
+  const [userData, setUserData] = useState({
+    name: "",
+    email: "",
+  });
+  useEffect(() => {
+    getMe();
+  }, []);
 
+  const getMe = async () => {
+    try {
+      const { data } = await request({
+        method: "GET",
+        url: "/me",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setUserData(data.user);
+    } catch (error) {
+      setUserData({ name: "", email: "" });
+    }
+  };
   // function to change the design view under 990 px
   const viewChange = () => {
     if (window.innerWidth < 990) {
@@ -58,48 +82,13 @@ const UserProfileLayout = () => {
               <div className="card-inner-group">
                 <div className="card-inner">
                   <div className="user-card">
-                    <UserAvatar text={findUpper(profileName)} theme="primary" />
+                    <UserAvatar
+                      text={findUpper(userData.name)}
+                      theme="primary"
+                    />
                     <div className="user-info">
-                      <span className="lead-text">{profileName}</span>
-                      <span className="sub-text">info@softnio.com</span>
-                    </div>
-                    <div className="user-action">
-                      <UncontrolledDropdown>
-                        <DropdownToggle
-                          tag="a"
-                          className="btn btn-icon btn-trigger mr-n2"
-                        >
-                          <Icon name="more-v"></Icon>
-                        </DropdownToggle>
-                        <DropdownMenu right>
-                          <ul className="link-list-opt no-bdr">
-                            <li>
-                              <DropdownItem
-                                tag="a"
-                                href="#dropdownitem"
-                                onClick={(ev) => {
-                                  ev.preventDefault();
-                                }}
-                              >
-                                <Icon name="camera-fill"></Icon>
-                                <span>Change Photo</span>
-                              </DropdownItem>
-                            </li>
-                            <li>
-                              <DropdownItem
-                                tag="a"
-                                href="#dropdownitem"
-                                onClick={(ev) => {
-                                  ev.preventDefault();
-                                }}
-                              >
-                                <Icon name="edit-fill"></Icon>
-                                <span>Update Profile</span>
-                              </DropdownItem>
-                            </li>
-                          </ul>
-                        </DropdownMenu>
-                      </UncontrolledDropdown>
+                      <span className="lead-text">{userData.name}</span>
+                      <span className="sub-text">{userData.email}</span>
                     </div>
                   </div>
                 </div>

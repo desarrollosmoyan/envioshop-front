@@ -4,15 +4,17 @@ import { useForm } from "react-hook-form";
 import { Container, Form, FormGroup, Row } from "reactstrap";
 import { RSelect } from "../../components/Component";
 import { Button } from "../../components/Component";
-import { API_ENDPOINTS, countryItems } from "../../constants";
+import { API_ENDPOINTS, countryItems, request } from "../../constants";
 import { useDispatch } from "react-redux";
 import { setRating } from "../../store/store";
 import { selectRating } from "../../store/store";
 import { toast, ToastContainer } from "react-toastify";
 import Input from "../../components/input/input/Input";
 import { useSelector } from "react-redux";
+import { useCookie } from "react-use";
 export default function PosForm() {
   const [isLoading, setLoading] = useState(true);
+  const [token] = useCookie("token");
   const dispatch = useDispatch();
   const { handleSubmit, register, errors } = useForm();
   const onFormSubmit = async (formData) => {
@@ -34,13 +36,13 @@ export default function PosForm() {
         type: "info",
         position: "bottom-right",
       });
-      const { data } = await axios.post(
+      const { data } = await request.post(
         API_ENDPOINTS.services.rating,
         postData,
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );

@@ -148,7 +148,9 @@ const ReactDataTable = ({
     let defaultData = tableData;
     if (searchText !== "") {
       defaultData = data.filter((item) => {
-        return item.name.toLowerCase().includes(searchText.toLowerCase());
+        return item.serviceName
+          .toLowerCase()
+          .includes(searchText.toLowerCase());
       });
       setTableData(defaultData);
     } else {
@@ -186,7 +188,7 @@ const ReactDataTable = ({
               <input
                 type="search"
                 className="form-control form-control-sm"
-                placeholder="Search by name"
+                placeholder="Buscar por empresa"
                 onChange={(ev) => setSearchText(ev.target.value)}
               />
             </label>

@@ -4,6 +4,7 @@ import UPSLOGO from "./assets/images/services/UPS.png";
 import ESTAFETALOGO from "./assets/images/services/estafeta.svg";
 import PAQUETEEXPRESSLOGO from "./assets/images/services/paquetexpress.svg";
 import REDPACKLOGO from "./assets/images/services/redpack.svg";
+import axios from "axios";
 export const API_ENDPOINTS = {
   baseUrl: process.env.REACT_APP_API_URL,
   auth: {
@@ -242,6 +243,12 @@ export const countryItems = [
   "Zimbabwe",
 ];
 
+export const request = axios.create({
+  headers: {
+    "Content-Type": "application/json",
+  },
+  baseURL: `${process.env.REACT_APP_API_URL}`,
+});
 export const companyLogos = {
   DHL: DHLLOGO,
   FEDEX: FEDEXLOGO,

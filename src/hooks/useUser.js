@@ -5,7 +5,7 @@ const useUser = (type) => {
   const request = axios.create({
     baseURL: `${process.env.REACT_APP_API_URL}/user/${type}`,
     headers: {
-      Authorization: token,
+      Authorization: `Bearer ${token}`,
     },
   });
   const getAll = async ([offset, limit], set, setCount) => {

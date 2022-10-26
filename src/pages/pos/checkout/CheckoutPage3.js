@@ -1,77 +1,74 @@
 import { useForm } from "react-hook-form";
 import { Form, FormGroup } from "reactstrap";
 import { Button } from "../../../components/Component";
-import { API_ENDPOINTS, companyLogos } from "../../../constants";
+import { API_ENDPOINTS, companyLogos, request } from "../../../constants";
 import { ErrorMessage } from "@hookform/error-message";
 import { useDispatch } from "react-redux";
 import { setPdf, setShipping } from "../../../store/store";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import axios from "axios";
 import ReactDatePicker from "react-datepicker";
 import { toast, ToastContainer } from "react-toastify";
 import useShipment from "../../../hooks/useShipment";
+import { useCookie } from "react-use";
 export default function CheckoutPage3({ setPage, company }) {
   const dispatch = useDispatch();
   const { create } = useShipment();
   const shipping = useSelector((state) => state.shipping.data);
   const selected = useSelector((state) => state.rating.selected);
+  const [me, setMe] = useState();
   const [date, setDate] = useState(Date.now());
+  const [token] = useCookie("token");
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    getMe();
+  }, []);
+  const getMe = async () => {
+    try {
+      const { data } = await request({
+        method: "GET",
+        url: `/me`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setMe(data.user);
+    } catch (error) {
+      toast("Algo salió mal!", { type: "error" });
+    }
+  };
   const { errors, handleSubmit, register, setValue } = useForm();
   const handleSecondPageSubmit = async (formData) => {
-    dispatch(
+    /* dispatch(
       setShipping({
         data: {
           ...shipping,
           ...formData,
         },
       })
-    );
+    );*/
     const url = `${API_ENDPOINTS.services.shipping}/${company}`;
     const toastLoading = toast.loading("Cargando...", {
       type: "info",
       position: "bottom-right",
     });
     try {
-      const { data } = await axios({
+      console.log(me);
+      const { data } = await request({
         method: "POST",
         url: url,
         data: {
+          franchiseId: me.franchiseId,
+          turnId: me.Turn.id,
+          shipmentPrice: selected.prices.total,
           ...shipping,
           ...formData,
         },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-      if (data.shipment.document.type === "ZPL") {
-        try {
-          const response = await fetch(
-            "http://api.labelary.com/v1/printers/8dpmm/labels/4x6/0/",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-                Accept: "application/pdf",
-              },
-              body: JSON.stringify(data.shipment.document.content),
-            }
-          );
-          const blob = await response.blob();
-          let url = URL.createObjectURL(blob);
-          console.log(url);
-          dispatch(setPdf({ data: url }));
-        } catch (error) {
-          console.log(error);
-          throw error;
-        }
-        toast.update(toastLoading, {
-          render: "Envio creado con éxito",
-          type: "success",
-          isLoading: false,
-          autoClose: true,
-          closeOnClick: true,
-        });
-        return;
-      }
+      console.log(data);
       dispatch(setPdf({ data: data.shipment.document.content }));
       toast.update(toastLoading, {
         render: "Envio creado con éxito",
@@ -80,42 +77,8 @@ export default function CheckoutPage3({ setPage, company }) {
         autoClose: true,
         closeOnClick: true,
       });
-      const shipmentBody = {
-        serviceName: company,
-        serviceType: "",
-        shipper: {
-          postalCode: shipping.shipperPostalCode,
-          name: shipping.shipperFullName,
-          email: shipping.shipperEmail,
-          cellphone: shipping.shipperCellphone,
-          city: shipping.shipperCity,
-          county: shipping.shipperCounty,
-          address: [
-            shipping.shipperAddress,
-            shipping.shipperAddress2,
-            shipping.shipperAddress3,
-          ],
-        },
-        receiver: {
-          postalCode: shipping.receiverPostalCode,
-          name: shipping.receiverFullName,
-          email: shipping.receiverEmail,
-          cellphone: shipping.receiverCellphone,
-          city: shipping.receiverCity,
-          county: shipping.receiverCounty,
-          address: [
-            shipping.receiverAddress,
-            shipping.receiverAddress2,
-            shipping.receiverAddress3,
-          ],
-        },
-        shipmentPrice: selected.price,
-        shipmentDescription: shipping.description,
-      };
-
-      create(shipmentBody);
     } catch (error) {
-      console.log(error);
+      toast("Algo salió mal!", { type: "error" });
     }
   };
   const onChangeDate = (newDate) => {

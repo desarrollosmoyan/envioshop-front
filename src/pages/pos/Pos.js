@@ -22,30 +22,49 @@ import {
   ModalFooter,
 } from "reactstrap";
 import PosModalForm from "./PosModalForm";
-import { companyLogos } from "../../constants";
+import { companyLogos, request } from "../../constants";
 import { useHistory } from "react-router";
 import useTurn from "../../hooks/useTurn";
-import useUser from "../../hooks/useUser";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { useCookie } from "react-use";
 export default function Pos() {
   const { end } = useTurn();
-  const { getOne } = useUser("cashier");
+  //const { getOne } = useUser("cashier");
   const [cashier, setCashier] = useState({});
   const [closeTurnModal, setCloseTurnModal] = useState(false);
-  const cashierId = JSON.parse(localStorage.getItem("userData")).id;
+  //const cashierId = JSON.parse(localStorage.getItem("userData")).id;
+  const [token] = useCookie("token");
   const rating = useSelector((state) => state.rating);
   const history = useHistory();
   useEffect(() => {
-    getOne(cashierId, setCashier);
+    makeAllRequest();
   }, []);
+  const getMe = async () => {
+    try {
+      const { data } = await request({
+        method: "GET",
+        url: "/me",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return data;
+    } catch (error) {}
+  };
+  const makeAllRequest = async () => {
+    const { user } = await getMe();
+    setCashier(user);
+    //await getOne(user.id, setCashier);
+  };
   const onCloseTurn = () => {
     end(cashier.Turn.id)
       .then(() => toast("Turno terminado con éxito", { type: "success" }))
       .catch(() => toast("No se puede cerrar el turno", { type: "error" }));
     setCloseTurnModal(false);
+    window.location.reload();
   };
-  console.log(rating.data);
+
   return (
     <Container className="min-vh-100">
       <Head title="POS" />
@@ -62,7 +81,7 @@ export default function Pos() {
                   {cashier.Turn
                     ? Object.keys(cashier.Turn.openBalance.coins).map(
                         (value) => (
-                          <span>
+                          <span key={value}>
                             {`${value.replace("coin", "")}: ${
                               cashier.Turn.openBalance.coins[value]
                             }`}
@@ -76,7 +95,7 @@ export default function Pos() {
                   {cashier.Turn
                     ? Object.keys(cashier.Turn.openBalance.bills).map(
                         (value) => (
-                          <span>
+                          <span key={value}>
                             {`${value.replace("bill", "")}: ${
                               cashier.Turn.openBalance.bills[value]
                             }`}
@@ -95,7 +114,7 @@ export default function Pos() {
                   {cashier.Turn
                     ? Object.keys(cashier.Turn.closeBalance.coins).map(
                         (value) => (
-                          <span>
+                          <span key={value}>
                             {`${value.replace("coin", "")}: ${
                               cashier.Turn.closeBalance.coins[value]
                             }`}
@@ -109,7 +128,7 @@ export default function Pos() {
                   {cashier.Turn
                     ? Object.keys(cashier.Turn.closeBalance.bills).map(
                         (value) => (
-                          <span>
+                          <span key={value}>
                             {`${value.replace("bill", "")}: ${
                               cashier.Turn.closeBalance.bills[value]
                             }`}

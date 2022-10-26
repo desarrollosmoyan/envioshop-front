@@ -17,19 +17,36 @@ import { toast } from "react-toastify";
 import { useState } from "react";
 import useTurn from "../../hooks/useTurn";
 import axios from "axios";
+import { request } from "../../constants";
+import { useCookie } from "react-use";
 export default function PosModalForm() {
   const { assign } = useTurn();
-  const cashierId = JSON.parse(localStorage.getItem("userData")).id;
+  //const cashierId = JSON.parse(localStorage.getItem("userData")).id;
+  const [userId, setUserId] = useState();
+  const [token] = useCookie("token");
   const [open, setOpen] = useState(true);
   useEffect(() => {
-    checkIfCashierHasTurn();
+    makeAllRequest();
   }, []);
-  const checkIfCashierHasTurn = async () => {
-    const { data } = await axios({
-      method: "GET",
-      url: `${process.env.REACT_APP_API_URL}/user/cashier/${cashierId}`,
-    });
-    if (data.Turn) {
+  const getMe = async () => {
+    try {
+      const response = await request({
+        method: "GET",
+        url: "/me",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const makeAllRequest = async () => {
+    const { user } = await getMe();
+    setUserId(user.id);
+    if (user.Turn) {
       setOpen(false);
     } else {
       setOpen(true);
@@ -60,7 +77,7 @@ export default function PosModalForm() {
         bill30: formData.bill30,
       },
     };
-    assign(cashierId, openBalance)
+    assign(userId, openBalance)
       .then(() => {
         toast("Turno creado con éxito!", { type: "success" });
         setOpen(false);

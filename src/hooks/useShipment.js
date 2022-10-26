@@ -5,7 +5,7 @@ const useShipment = () => {
   const request = axios.create({
     baseURL: `${process.env.REACT_APP_API_URL}/sales`,
     headers: {
-      Authorization: token,
+      Authorization: `Bearer ${token}`,
     },
   });
   const create = async (body, set = null) => {

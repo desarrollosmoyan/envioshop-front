@@ -15,15 +15,19 @@ import { Button } from "reactstrap";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
+import { request } from "../../constants";
+import { useCookie } from "react-use";
 const CoinModal = ({ open, setOpen }) => {
   const { assign, end, update } = useTurn();
   const selected = useSelector((state) => state.rating.selected);
   //Cambiar por cookie
-  const cashierId = JSON.parse(localStorage.getItem("userData")).id;
+  const [token] = useCookie("token");
+  const [cashierId, setCashierId] = useState();
   const [coins, setCoins] = useState({ coin10: 0, coin20: 0, coin30: 0 });
   const [bills, setBills] = useState({ bill10: 0, bill20: 0, bill30: 0 });
   useEffect(() => {
-    checkIfCashierHasTurn();
+    getMe();
+    //checkIfCashierHasTurn();
   }, []);
   const checkIfCashierHasTurn = async () => {
     const { data } = await axios({
@@ -34,6 +38,26 @@ const CoinModal = ({ open, setOpen }) => {
       setOpen(false);
     } else {
       setOpen(true);
+    }
+  };
+
+  const getMe = async () => {
+    try {
+      const { data } = await request({
+        method: "GET",
+        url: "/me",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setCashierId(data.user.id);
+      if (data.user.Turn) {
+        setOpen(false);
+      } else {
+        setOpen(true);
+      }
+    } catch (error) {
+      toast("Algo salió mal!", { type: "error" });
     }
   };
   const [total, setTotal] = useState(0);

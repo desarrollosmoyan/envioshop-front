@@ -22,9 +22,6 @@ const User = () => {
   useEffect(() => {
     if (!token) return;
     getUser(token);
-    /* const userData = localStorage.getItem("userData");
-    if (!userData) return;
-    dispatch(setUser(JSON.parse(userData)));*/
   }, []);
   const getUser = async (token) => {
     try {

@@ -14,6 +14,7 @@ import { defaultShipmentData } from "../../constants";
 import useShipment from "../../hooks/useShipment";
 import { ReactDataTable } from "../../components/Component";
 import { useEffect, useState } from "react";
+import { Button } from "reactstrap";
 export default function ShipmentManagment() {
   const { getAll } = useShipment();
 
@@ -41,8 +42,28 @@ export default function ShipmentManagment() {
     {
       name: "Fecha y Hora",
       selector: (row) => new Date(row.createdAt).toLocaleString(),
+      sortable: true,
+    },
+    {
+      name: "Documento",
+      cell: (row) => (
+        <a
+          download={`Documento-Envio-${new Date(
+            row.createdAt
+          ).toLocaleDateString()}`}
+          target="_blank"
+          href={`data:application/pdf;base64,${row.shipmentPdf}`}
+        >
+          <Button color="primary">Descargar PDF</Button>
+        </a>
+      ),
+      selector: (row) => "Descargar Documento",
     },
   ];
+
+  const downloadPDF = (pdfInBase64) => {
+    const linkSource = `data:application/pdf;base64,${pdfInBase64}`;
+  };
   const [cols, setCols] = useState(columns);
   const [sales, setSalesList] = useState([]);
   useEffect(() => {
@@ -67,7 +88,7 @@ export default function ShipmentManagment() {
                 Gestión de envios
               </BlockTitle>
               <BlockDes>
-                <p>{`Actualmente hay ${3} envios.`}</p>
+                <p>{`Actualmente hay ${sales.length} envios.`}</p>
               </BlockDes>
             </BlockHeadContent>
             <BlockHeadContent></BlockHeadContent>

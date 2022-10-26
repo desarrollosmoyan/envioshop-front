@@ -22,8 +22,7 @@ import Pos from "./pages/pos/Pos";
 import Checkout from "./pages/pos/Checkout";
 import { useSelector } from "react-redux";
 const App = (props) => {
-  const user = useSelector((state) => state.user);
-  console.log(user);
+  //const user = useSelector((state) => state.user);
   return (
     <Switch>
       {/* Auth Pages */}

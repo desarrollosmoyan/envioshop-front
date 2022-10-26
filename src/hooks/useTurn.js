@@ -1,8 +1,15 @@
 import axios from "axios";
+import { useCookie } from "react-use";
 const useTurn = () => {
+  const [token] = useCookie("token");
   const request = axios.create({
     baseURL: `${process.env.REACT_APP_API_URL}/turn`,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
   });
+
   const assign = async (cashierId, balance, set = null) => {
     try {
       const { data } = await request.post(`/${cashierId}`, {
