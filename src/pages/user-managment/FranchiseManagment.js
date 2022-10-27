@@ -381,7 +381,7 @@ const FranchiseManagment = () => {
                           <span>Eliminar</span>
                         </DropdownItem>
                       </li>
-                      <li>
+                      {/*<li>
                         <DropdownItem
                           tag="a"
                           href="#"
@@ -393,7 +393,7 @@ const FranchiseManagment = () => {
                           <Icon name="trash"></Icon>
                           <span>Suspend Selected</span>
                         </DropdownItem>
-                      </li>
+                      </li>*/}
                     </ul>
                   </DropdownMenu>
                 </UncontrolledDropdown>
@@ -471,7 +471,7 @@ const FranchiseManagment = () => {
                             text="Editar"
                           />
                         </li>
-                        {item.status !== "Suspend" && (
+                        {/*item.status !== "Suspend" && (
                           <React.Fragment>
                             <li
                               className="nk-tb-action-hidden"
@@ -487,7 +487,7 @@ const FranchiseManagment = () => {
                               />
                             </li>
                           </React.Fragment>
-                        )}
+                        )*/}
                         <li>
                           <UncontrolledDropdown>
                             <DropdownToggle
@@ -510,7 +510,7 @@ const FranchiseManagment = () => {
                                     <span>Edit</span>
                                   </DropdownItem>
                                 </li>
-                                {item.status !== "Suspend" && (
+                                {/*item.status !== "Suspend" && (
                                   <React.Fragment>
                                     <li className="divider"></li>
                                     <li onClick={() => suspendUser(item.id)}>
@@ -526,7 +526,7 @@ const FranchiseManagment = () => {
                                       </DropdownItem>
                                     </li>
                                   </React.Fragment>
-                                )}
+                                      )*/}
                               </ul>
                             </DropdownMenu>
                           </UncontrolledDropdown>

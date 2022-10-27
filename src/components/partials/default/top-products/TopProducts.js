@@ -1,39 +1,9 @@
 import React, { useEffect, useState } from "react";
-import {
-  Card,
-  DropdownMenu,
-  DropdownToggle,
-  DropdownItem,
-  UncontrolledDropdown,
-} from "reactstrap";
-import {
-  productData,
-  productDataSet2,
-  productDataSet3,
-  productDataSet4,
-} from "./ProductData";
+import { Card } from "reactstrap";
+import { UserAvatar } from "../../../Component";
 
-const TopProducts = () => {
-  const [data, setData] = useState("Weekly");
-  const [dataSet, setDataSet] = useState(productData);
-
-  useEffect(() => {
-    let object;
-    if (data === "Daily") {
-      object = productDataSet2;
-    } else if (data === "Monthly") {
-      object = productDataSet3;
-    } else {
-      object = productDataSet4;
-    }
-    setDataSet(object);
-  }, [data]);
-
-  const returnTotal = (n1, n2) => {
-    var result = n1 * Number(n2);
-    return result.toFixed(2);
-  };
-
+const TopProducts = ({ topFranchises }) => {
+  const [total, setTotal] = useState(0);
   return (
     <Card className="h-100">
       <div className="card-inner">
@@ -43,20 +13,21 @@ const TopProducts = () => {
           </div>
         </div>
         <ul className="nk-top-products">
-          {dataSet.map((item, idx) => (
+          {topFranchises.map((item, idx) => (
             <li className="item" key={idx}>
               <div className="thumb">
-                <img src={item.img} alt="" />
+                <UserAvatar
+                  className="sm"
+                  theme={"primary"}
+                  text={item.name[0]}
+                />
               </div>
               <div className="info">
                 <div className="title">{item.name}</div>
-                <div className="price">${item.price}</div>
               </div>
               <div className="total">
-                <div className="amount">
-                  $ {returnTotal(item.price, item.sold)}
-                </div>
-                <div className="count">{item.sold} Vendidos</div>
+                <div className="amount">$ {total}</div>
+                <div className="count">{item.sales.length} Vendidos</div>
               </div>
             </li>
           ))}

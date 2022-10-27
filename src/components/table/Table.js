@@ -39,7 +39,7 @@ const Table = ({
     UPS: companyLogos.UPS,
     ESTAFETA: companyLogos.ESTAFETA,
     REDPACK: companyLogos.REDPACK,
-    "PAQUETE EXPRESS": companyLogos.PAQUETEEXPRESS,
+    "PAQUETE EXPRESS": companyLogos["PAQUETE EXPRESS"],
   };
   return (
     <div

@@ -47,7 +47,7 @@ const RecentOrders = ({ data = [] }) => {
                 <UserAvatar
                   className="sm"
                   theme={"primary"}
-                  text={item.initial}
+                  text={item.Turn.cashier.name[0]}
                   image={item.img}
                 ></UserAvatar>
                 <div className="user-name">

@@ -44,12 +44,13 @@ const useTurn = () => {
     try {
       const url = `/${turnId}`;
       const { data } = await request.patch(url, updateData);
+      if (!set) return;
       set(data);
     } catch (error) {
       throw error;
     }
   };
-  return { assign, end, getOne };
+  return { assign, end, getOne, update };
 };
 
 export default useTurn;

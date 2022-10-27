@@ -23,6 +23,7 @@ const CoinModal = ({ open, setOpen }) => {
   //Cambiar por cookie
   const [token] = useCookie("token");
   const [cashierId, setCashierId] = useState();
+  const [turnId, setTurnId] = useState();
   const [coins, setCoins] = useState({ coin10: 0, coin20: 0, coin30: 0 });
   const [bills, setBills] = useState({ bill10: 0, bill20: 0, bill30: 0 });
   useEffect(() => {
@@ -53,6 +54,7 @@ const CoinModal = ({ open, setOpen }) => {
       setCashierId(data.user.id);
       if (data.user.Turn) {
         setOpen(false);
+        setTurnId(data.user.Turn.id);
       } else {
         setOpen(true);
       }
@@ -75,21 +77,36 @@ const CoinModal = ({ open, setOpen }) => {
   const onHandleSubmit = (formData) => {
     const openBalance = {
       coins: {
-        coin10: formData.coin10,
-        coin20: formData.coin20,
-        coin30: formData.coin30,
+        coin10: -formData.coin10,
+        coin20: -formData.coin20,
+        coin30: -formData.coin30,
       },
       bills: {
-        bill10: formData.bill10,
-        bill20: formData.bill20,
-        bill30: formData.bill30,
+        bill10: -formData.bill10,
+        bill20: -formData.bill20,
+        bill30: -formData.bill30,
       },
     };
-    if (
-      total < parseFloat(selected.prices.total) ||
-      total === parseFloat(selected.prices.total)
-    ) {
-      console.log("pepe");
+    if (total >= parseFloat(selected.prices.total)) {
+      const updatedData = {
+        coins: {
+          coin10: formData.coin10 + openBalance.coins.coin10,
+          coin20: formData.coin20 + openBalance.coins.coin20,
+          coin30: formData.coin30 + openBalance.coins.coin30,
+        },
+        bills: {
+          bill10: formData.bill10 + openBalance.bills.bill10,
+          bill20: formData.bill20 + openBalance.bills.bill20,
+          bill30: formData.bill30 + openBalance.bills.bill30,
+        },
+      };
+      update(turnId, updatedData)
+        .then(() => {
+          toast("Pago realizado con éxito", { type: "success" });
+          setOpen(false);
+          window.location.reload();
+        })
+        .catch(() => toast("Algo salió mal!", { type: "error" }));
     }
     /*assign(cashierId, openBalance)
       .then(() => {

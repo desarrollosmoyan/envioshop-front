@@ -39,7 +39,10 @@ export default function CheckoutPage3({ setPage, company }) {
   };
   const { errors, handleSubmit, register, setValue } = useForm();
   const handleSecondPageSubmit = async (formData) => {
-    const url = `${API_ENDPOINTS.services.shipping}/${company}`;
+    const url = `${API_ENDPOINTS.services.shipping}/${company.replace(
+      " ",
+      ""
+    )}`;
     const toastLoading = toast.loading("Cargando...", {
       type: "info",
       position: "bottom-right",
@@ -52,6 +55,7 @@ export default function CheckoutPage3({ setPage, company }) {
           franchiseId: me.franchiseId,
           turnId: me.Turn.id,
           shipmentPrice: selected.prices.total,
+          serviceType: selected.serviceName,
           ...shipping,
           ...formData,
         },
@@ -59,6 +63,9 @@ export default function CheckoutPage3({ setPage, company }) {
           Authorization: `Bearer ${token}`,
         },
       });
+      if (data.shipment.document.content === "") {
+        dispatch(setPdf({ message: "Se debe crear manualmente." }));
+      }
       dispatch(setPdf({ data: data.shipment.document.content }));
       toast.update(toastLoading, {
         render: "Envio creado con éxito",
@@ -68,6 +75,7 @@ export default function CheckoutPage3({ setPage, company }) {
         closeOnClick: true,
       });
     } catch (error) {
+      console.log(error);
       toast("Algo salió mal!", { type: "error" });
     }
   };

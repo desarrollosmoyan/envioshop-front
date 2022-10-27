@@ -36,11 +36,10 @@ import { useCookie } from "react-use";
 const Homepage = () => {
   const [sm, updateSm] = useState(false);
   const [token] = useCookie("token");
-  const [stats, setStats] = useState({});
+  const [stats, setStats] = useState();
   useEffect(() => {
     getStats();
   }, []);
-  console.log(stats);
 
   const getStats = async () => {
     try {
@@ -137,7 +136,7 @@ const Homepage = () => {
               <RecentOrders data={stats ? stats.recentShipments : []} />
             </Col>
             <Col xxl="4" md="8" lg="6">
-              <TopProducts />
+              <TopProducts topFranchises={stats ? stats.topFranchises : []} />
             </Col>
           </Row>
         </Block>

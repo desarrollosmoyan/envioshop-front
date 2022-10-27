@@ -30,7 +30,6 @@ const Settings = () => {
               Aquí podrás modificar datos como URL de los servicios, TOKENS y
               demás
             </p>
-
             <form className="gy-3 form-settings">
               <Row className="g-3 align-center">
                 <Col lg="5">
@@ -127,6 +126,10 @@ const Settings = () => {
                   </FormGroup>
                 </Col>
               </Row>
+              <span className="form-note text-primary">
+                Por motivos de seguridad, la nueva url se comienza a utilizar
+                pasados unos 30 minutos.
+              </span>
             </form>
           </PreviewAltCard>
         </Block>
