@@ -39,21 +39,12 @@ export default function CheckoutPage3({ setPage, company }) {
   };
   const { errors, handleSubmit, register, setValue } = useForm();
   const handleSecondPageSubmit = async (formData) => {
-    /* dispatch(
-      setShipping({
-        data: {
-          ...shipping,
-          ...formData,
-        },
-      })
-    );*/
     const url = `${API_ENDPOINTS.services.shipping}/${company}`;
     const toastLoading = toast.loading("Cargando...", {
       type: "info",
       position: "bottom-right",
     });
     try {
-      console.log(me);
       const { data } = await request({
         method: "POST",
         url: url,
@@ -68,7 +59,6 @@ export default function CheckoutPage3({ setPage, company }) {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(data);
       dispatch(setPdf({ data: data.shipment.document.content }));
       toast.update(toastLoading, {
         render: "Envio creado con éxito",
