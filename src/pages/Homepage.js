@@ -28,12 +28,9 @@ import {
   DefaultCustomerChart,
   DefaultOrderChart,
   DefaultRevenueChart,
-  DefaultVisitorChart,
 } from "../components/partials/charts/default/DefaultCharts";
-import useUser from "../hooks/useUser";
 import { useEffect } from "react";
-import useShipment from "../hooks/useShipment";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import axios from "axios";
 import { useCookie } from "react-use";
 const Homepage = () => {
@@ -84,65 +81,7 @@ const Homepage = () => {
                 <div
                   className="toggle-expand-content"
                   style={{ display: sm ? "block" : "none" }}
-                >
-                  <ul className="nk-block-tools g-3">
-                    <li>
-                      <UncontrolledDropdown>
-                        <DropdownToggle
-                          tag="a"
-                          className="dropdown-toggle btn btn-white btn-dim btn-outline-light"
-                        >
-                          <Icon
-                            className="d-none d-sm-inline"
-                            name="calender-date"
-                          />
-                          <span>
-                            <span className="d-none d-md-inline">Ultimos</span>{" "}
-                            30 Dias
-                          </span>
-                          <Icon className="dd-indc" name="chevron-right" />
-                        </DropdownToggle>
-                        <DropdownMenu right>
-                          <ul className="link-list-opt no-bdr">
-                            <li>
-                              <DropdownItem
-                                tag="a"
-                                onClick={(ev) => {
-                                  ev.preventDefault();
-                                }}
-                                href="#!"
-                              >
-                                <span>Ultimos 30 Días</span>
-                              </DropdownItem>
-                            </li>
-                            <li>
-                              <DropdownItem
-                                tag="a"
-                                onClick={(ev) => {
-                                  ev.preventDefault();
-                                }}
-                                href="#dropdownitem"
-                              >
-                                <span>Ultimos 6 Meses</span>
-                              </DropdownItem>
-                            </li>
-                            <li>
-                              <DropdownItem
-                                tag="a"
-                                onClick={(ev) => {
-                                  ev.preventDefault();
-                                }}
-                                href="#dropdownitem"
-                              >
-                                <span>Ultimas 3 Semanas</span>
-                              </DropdownItem>
-                            </li>
-                          </ul>
-                        </DropdownMenu>
-                      </UncontrolledDropdown>
-                    </li>
-                  </ul>
-                </div>
+                ></div>
               </div>
             </BlockHeadContent>
           </BlockBetween>
@@ -185,7 +124,7 @@ const Homepage = () => {
                 amount={stats ? stats.totalCashiers : 0}
               />
             </Col>
-            <Col xxl="6">
+            {/*<Col xxl="6">
               <SalesStatistics />
             </Col>
             <Col xxl="3" md="6">
@@ -193,15 +132,11 @@ const Homepage = () => {
             </Col>
             <Col xxl="3" md="6">
               <StoreStatistics />
-            </Col>
+                </Col>*/}
             <Col xxl="8">
-              <h3>Envios recientes</h3>
-              <RecentOrders />
+              <RecentOrders data={stats ? stats.recentShipments : []} />
             </Col>
             <Col xxl="4" md="8" lg="6">
-              <h1>
-                Franquicias ordenadas de la que menos vende a la que mas vende
-              </h1>
               <TopProducts />
             </Col>
           </Row>
