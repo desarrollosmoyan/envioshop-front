@@ -16,11 +16,15 @@ import { ReactDataTable } from "../../components/Component";
 import { useEffect, useState } from "react";
 import { Button } from "reactstrap";
 import { useSelector } from "react-redux";
+import { request } from "../../constants";
+import { useCookie } from "react-use";
+//import toast from "react-toastify";
 export default function ShipmentManagment() {
   const [count, setCount] = useState(0);
   const { getAll, getCount } = useShipment();
+  const [token] = useCookie("token");
   const { currentPage, limit } = useSelector((state) => state.shipmentPage);
-  console.log(currentPage);
+  //const [currentFranchise, setCurrentFranchise] = useState({});
   const columns = [
     {
       name: "Empresa",
@@ -63,13 +67,32 @@ export default function ShipmentManagment() {
       selector: (row) => "Descargar Documento",
     },
   ];
-
+  const user = useSelector((state) => state.user);
   const [cols] = useState(columns);
   const [sales, setSalesList] = useState([]);
   useEffect(() => {
-    getAll([currentPage * limit, limit], setSalesList, setCount);
+    if (user.type === "admin") {
+      getAll([(currentPage - 1) * limit, limit], setSalesList, setCount);
+    } else {
+      getMe();
+    }
   }, [currentPage, limit]);
-  console.log(currentPage);
+
+  const getMe = async () => {
+    try {
+      const { data } = await request({
+        method: "GET",
+        url: "/me",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(data.user);
+      setSalesList(data.user.sales);
+    } catch (error) {
+      //toast("Algo salió mal!", { type: "error" });
+    }
+  };
   const keyMap = {
     serviceName: "Empresa",
     serviceType: "Servicio",

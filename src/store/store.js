@@ -23,7 +23,7 @@ const userSlice = createSlice({
 const shipmentSlice = createSlice({
   name: "shipmentPage",
   initialState: {
-    currentPage: 0,
+    currentPage: 1,
     limit: 10,
   },
   reducers: {

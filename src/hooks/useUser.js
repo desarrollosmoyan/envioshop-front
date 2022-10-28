@@ -9,13 +9,34 @@ const useUser = (type) => {
       Authorization: `Bearer ${token}`,
     },
   });
-  const getAll = async ([offset, limit], set, setCount) => {
+  const getAll = async ([offset, limit], set, setCount, body) => {
     try {
-      const { data } = await request.get(`/?offset=${offset}&limit=${limit}`);
+      let cityName;
+      console.log(body);
+      if (body) {
+        cityName = {
+          cityName: body,
+        };
+      }
+      console.log(cityName);
+      const { data } = await request({
+        method: "GET",
+        url: "",
+        data: {
+          cityName: "hola",
+        },
+        params: {
+          offset: offset,
+          limit: limit,
+        },
+      });
+
       set(data[`${type}s`]);
       setCount(data["total"]);
-      console.log(offset, limit);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   };
   const getOne = async (id, set) => {
     try {
@@ -68,9 +89,23 @@ const useUser = (type) => {
     }
   };
 
+  const getByCityName = async ([offset = 0, limit = 20], set = null) => {
+    try {
+      const url = `/cities/?offset=${offset}&limit=${limit}`;
+      const { data } = await request({
+        method: "GET",
+        url: url,
+      });
+      if (!set) return data;
+
+      set(data.cities);
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const getBySearch = async (value, [offset = 0, limit = 20], set = null) => {
     try {
-      console.log(offset, limit);
       const url = `/search/${value}?offset=${offset}&limit=${limit}`;
       const { data } = await request({
         method: "GET",
@@ -80,6 +115,7 @@ const useUser = (type) => {
       set(data.franchises);
       console.log(data);
     } catch (error) {
+      console.log(error);
       throw error;
     }
   };
@@ -92,6 +128,7 @@ const useUser = (type) => {
     create,
     getOne,
     getBySearch,
+    getByCityName,
   };
 };
 

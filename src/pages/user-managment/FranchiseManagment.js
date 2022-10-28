@@ -29,6 +29,7 @@ import {
   PreviewAltCard,
   RSelect,
 } from "../../components/Component";
+import { components } from "react-select";
 import Content from "../../layout/content/Content";
 import Head from "../../layout/head/Head";
 import { userData } from "./UserData";
@@ -39,27 +40,90 @@ import { toast, ToastContainer } from "react-toastify";
 import useUser from "../../hooks/useUser";
 import exportFromJSON from "export-from-json";
 import { useCallback } from "react";
+import axios from "axios";
+import { useCookie } from "react-use";
 const FranchiseManagment = () => {
-  const { getAll, create, deleteOne, updateOne, deleteMany, getBySearch } =
-    useUser("franchise");
+  const {
+    getAll,
+    create,
+    deleteOne,
+    updateOne,
+    deleteMany,
+    getBySearch,
+    getByCityName,
+  } = useUser("franchise");
+  const [token] = useCookie("token");
   const [franchisesList, setFranchisesList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemPerPage, setItemPerPage] = useState(5);
+  const [itemPerList, setItemPerList] = useState(10);
+  const [cityPage] = useState(1);
   const [count, setCount] = useState(0);
+  const [cityName, setCityName] = useState("");
+  const [cityList, setCityList] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   useEffect(() => {
+    console.log("executing");
     getAll(
       [(currentPage - 1) * itemPerPage, itemPerPage],
       setFranchisesList,
       setCount
     );
   }, [itemPerPage, currentPage]);
-
   useEffect(() => {
-    if (searchValue.length === 0) return;
     searchFranchisesByName();
   }, [searchValue, currentPage, itemPerPage]);
-  console.log(currentPage);
+
+  useEffect(() => {
+    console.log("executing");
+    filterByCityName();
+  }, [cityPage, itemPerList]);
+
+  const filterByCityName = useCallback(() => {
+    getByCityName([(cityPage - 1) * itemPerList, itemPerList], setCityList);
+  }, [cityPage, itemPerList]);
+
+  useEffect(() => {
+    if (cityName.length < 3) return;
+
+    getAllFranchisesByCity(
+      [(currentPage - 1) * itemPerPage, itemPerPage],
+      setFranchisesList,
+      setCount,
+      cityName
+    );
+  }, [cityName]);
+
+  const getAllFranchisesByCity = async (
+    [offset, limit],
+    set,
+    setCount,
+    cityName
+  ) => {
+    try {
+      const { data } = await axios({
+        method: "POST",
+        url: `${process.env.REACT_APP_API_URL}/user/franchise/search`,
+        params: {
+          offset: offset,
+          limit: limit,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        data: {
+          cityName: cityName,
+        },
+      });
+      set(data.franchises);
+      setCount(data.total);
+    } catch (error) {
+      toast("Algo salió mal!", { type: "error" });
+    }
+  };
+
+  console.log(franchisesList);
+
   const [sm, updateSm] = useState(false);
   const [onSearchText] = useState("");
   const [modal, setModal] = useState({
@@ -84,7 +148,7 @@ const FranchiseManagment = () => {
     setFranchisesList([...newData]);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   // Changing state value when searching name
-  useEffect(() => {
+  /* useEffect(() => {
     if (onSearchText !== "") {
       const filteredObject = userData.filter((item) => {
         return (
@@ -96,7 +160,7 @@ const FranchiseManagment = () => {
     } else {
       setFranchisesList([]);
     }
-  }, [onSearchText, setFranchisesList]);
+  }, [onSearchText, setFranchisesList]);*/
 
   // function to change the selected property of an item
   const onSelectChange = (e, id) => {
@@ -231,6 +295,7 @@ const FranchiseManagment = () => {
   };
 
   const searchFranchisesByName = useCallback(() => {
+    if (searchValue.length < 3) return;
     getBySearch(
       searchValue,
       [(currentPage - 1) * itemPerPage, itemPerPage],
@@ -254,28 +319,27 @@ const FranchiseManagment = () => {
     const exportType = exportFromJSON.types.csv;
     exportFromJSON({ data, fileName, exportType });
   };
-
+  /*useEffect(() => {
+    if (cityName === "") return;
+    getAll(
+      [(cityPage - 1) * itemPerList, itemPerList],
+      setFranchisesList,
+      setCount,
+      cityName
+    ).catch((error) => console.log(error));
+  }, [cityName]);*/
+  //console.log(franchisesList);
   // Change Page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const filterCityNames = () => {
-    const arr = franchisesList
-      .filter(
-        (franchise, index, arr) =>
-          index === arr.findIndex((t) => t.ubication === franchise.ubication)
-      )
-      .map((franchise) => ({
-        value: franchise.ubication,
-        label: franchise.ubication,
-      }));
-    return arr;
-  };
   const filterFranchisesByCityName = (e) => {
     const value = e.value;
-    const arr = franchisesList.filter((franchise) =>
-      franchise.ubication === value ? true : false
-    );
-    setFranchisesList(arr);
+    console.log(value);
+    setCityName(value);
+  };
+
+  const onLoadMoreCities = () => {
+    setItemPerList(itemPerList + 5);
   };
 
   const handleSearch = (e) => {
@@ -351,7 +415,19 @@ const FranchiseManagment = () => {
               <FormGroup className="w-50">
                 <RSelect
                   placeholder="Ciudad"
-                  options={filterCityNames()}
+                  options={
+                    cityList.length > 0
+                      ? cityList.map((item) => ({ label: item, value: item }))
+                      : []
+                  }
+                  components={{
+                    MenuList: (menuListProps) => (
+                      <SelectMenuButton
+                        {...menuListProps}
+                        onLoadMoreCities={onLoadMoreCities}
+                      />
+                    ),
+                  }}
                   onChange={filterFranchisesByCityName}
                 />
               </FormGroup>
@@ -858,6 +934,24 @@ const FranchiseManagment = () => {
         </Modal>
       </Content>
     </React.Fragment>
+  );
+};
+
+const SelectMenuButton = ({ onLoadMoreCities, ...props }) => {
+  return (
+    <components.MenuList {...props}>
+      {props.children}
+      <div className="w-100 d-flex aling-items-center justify-content-center">
+        <Button
+          onClick={onLoadMoreCities}
+          className=""
+          color="primary"
+          size="xs"
+        >
+          Cargar más
+        </Button>
+      </div>
+    </components.MenuList>
   );
 };
 

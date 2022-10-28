@@ -135,10 +135,10 @@ const ReactDataTable = ({
   const [exportData, setExportData] = useState([]);
   const dispatch = useDispatch();
   const page = useSelector((state) => state.shipmentPage.currentPage);
+  console.log(page);
 
   useEffect(() => {
     console.log("render 1");
-
     dispatch(setLimit(rowsPerPageS));
   }, [rowsPerPageS]);
   useEffect(() => {
@@ -261,6 +261,7 @@ const ReactDataTable = ({
           onChangePage,
           onChangeRowsPerPage,
         }) => {
+          console.log({ currentPage: currentPage });
           return (
             <DataTablePagination
               customItemPerPage={rowsPerPageS}

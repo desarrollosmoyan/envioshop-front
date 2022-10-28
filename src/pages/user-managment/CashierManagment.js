@@ -41,6 +41,7 @@ import exportFromJSON from "export-from-json";
 import { useCookie } from "react-use";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { components } from "react-select";
 const CashierManagment = () => {
   const [token] = useCookie("token");
   const { getAll, create, deleteOne, updateOne, deleteMany } =
@@ -51,7 +52,10 @@ const CashierManagment = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [count, setCount] = useState(0);
   const [itemPerPage, setItemPerPage] = useState(10);
+  const [itemPerList, setItemPerList] = useState(5);
+  const [listPage, setListPage] = useState(0);
   const [currentFranchise, setCurrentFranchise] = useState(null);
+  const [franchiseCount, setFranchiseCount] = useState(0);
   const user = useSelector((state) => state.user);
   console.log(user);
   useEffect(() => {
@@ -61,13 +65,17 @@ const CashierManagment = () => {
         setCashiersList,
         setCount
       );
-      getAllFranchises([0, 20], setFranchisesList);
+      getAllFranchises(
+        [listPage * itemPerList, itemPerList],
+        setFranchisesList,
+        setFranchiseCount
+      );
       return;
     }
     if (user.type === "franchise") {
       getMe();
     }
-  }, [itemPerPage, currentPage, user]);
+  }, [itemPerPage, currentPage, user, listPage, itemPerList]);
 
   const getMe = async () => {
     try {
@@ -250,37 +258,12 @@ const CashierManagment = () => {
   };
 
   // function to change the complete property of an item
-  const selectorSuspendUser = () => {
-    let newData;
-    newData = cashiersList.map((item) => {
-      if (item.checked === true) item.status = "Suspend";
-      return item;
-    });
-    setCashiersList([...newData]);
-  };
-
   // Get current list, pagination
   const indexOfLastItem = currentPage * itemPerPage;
   const indexOfFirstItem = indexOfLastItem - itemPerPage;
   const currentItems = cashiersList;
   // Change Page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  const filterFranchiseName = () => {
-    console.log(cashiersList);
-    const arr = cashiersList
-      .filter(
-        (cashier, index, arr) =>
-          index ===
-          arr.findIndex((t) => t.franchise.name === cashier.franchise.name)
-      )
-      .map((cashier) => ({
-        value: cashier.franchise.name,
-        label: cashier.franchise.name,
-      }));
-    return arr;
-  };
-
   const handleCashierNameFilterChange = (e) => {
     const value = e.value;
     const arr = cashiersList.filter((cashier) =>
@@ -304,6 +287,35 @@ const CashierManagment = () => {
     exportFromJSON({ data, fileName, exportType });
   };
 
+  const onLoadMoreFranchises = () => {
+    setItemPerList(itemPerList + 10);
+  };
+
+  const onChangeFranchise = (e) => {
+    console.log(e.value);
+    const franchiseId = user.type === "admin" ? e.value : currentFranchise.id;
+    getAllCashiersFromOneFranchise(franchiseId);
+  };
+  const getAllCashiersFromOneFranchise = async (id) => {
+    console.log(token);
+    try {
+      const { data } = await axios({
+        method: "POST",
+        url: `${process.env.REACT_APP_API_URL}/user/cashier/${id}`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          offset: 0,
+          limit: itemPerPage,
+        },
+      });
+      setCashiersList(data.cashiers);
+    } catch (error) {
+      console.log(error);
+      toast("Algo salió mal!", { type: "error" });
+    }
+  };
   const { errors, register, handleSubmit, control } = useForm();
   return (
     <React.Fragment>
@@ -364,12 +376,23 @@ const CashierManagment = () => {
         <Block>
           <ToastContainer />
           <Row className="justify-content-between">
-            <div className="w-25">
+            <div className="w-15">
               {user.type === "admin" ? (
                 <RSelect
                   placeholder="Filtrar por nombre de franquicia"
-                  options={filterFranchiseName()}
-                  onChange={handleCashierNameFilterChange}
+                  options={franchiseList.map((item) => ({
+                    value: item.id,
+                    label: item.name,
+                  }))}
+                  onChange={onChangeFranchise}
+                  components={{
+                    MenuList: (menuListProps) => (
+                      <SelectMenuButton
+                        {...menuListProps}
+                        onLoadMoreFranchises={onLoadMoreFranchises}
+                      />
+                    ),
+                  }}
                 />
               ) : null}
             </div>
@@ -855,6 +878,24 @@ const CashierManagment = () => {
         </Modal>
       </Content>
     </React.Fragment>
+  );
+};
+
+const SelectMenuButton = ({ onLoadMoreFranchises, ...props }) => {
+  return (
+    <components.MenuList {...props}>
+      {props.children}
+      <div className="w-100 d-flex aling-items-center justify-content-center">
+        <Button
+          onClick={onLoadMoreFranchises}
+          className=""
+          color="primary"
+          size="xs"
+        >
+          Cargar más
+        </Button>
+      </div>
+    </components.MenuList>
   );
 };
 
