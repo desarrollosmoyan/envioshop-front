@@ -38,12 +38,15 @@ import { useForm } from "react-hook-form";
 import { toast, ToastContainer } from "react-toastify";
 import useUser from "../../hooks/useUser";
 import exportFromJSON from "export-from-json";
+import { useCallback } from "react";
 const FranchiseManagment = () => {
-  const { getAll, create, deleteOne, updateOne } = useUser("franchise");
+  const { getAll, create, deleteOne, updateOne, deleteMany, getBySearch } =
+    useUser("franchise");
   const [franchisesList, setFranchisesList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemPerPage, setItemPerPage] = useState(5);
   const [count, setCount] = useState(0);
+  const [searchValue, setSearchValue] = useState("");
   useEffect(() => {
     getAll(
       [(currentPage - 1) * itemPerPage, itemPerPage],
@@ -51,6 +54,11 @@ const FranchiseManagment = () => {
       setCount
     );
   }, [itemPerPage, currentPage]);
+
+  useEffect(() => {
+    if (searchValue.length === 0) return;
+    searchFranchisesByName();
+  }, [searchValue, currentPage, itemPerPage]);
   console.log(currentPage);
   const [sm, updateSm] = useState(false);
   const [onSearchText] = useState("");
@@ -116,11 +124,11 @@ const FranchiseManagment = () => {
 
   // submit function to add a new item
   const onFormSubmit = (submitData) => {
-    const { name, email, cellphone, ubication } = submitData;
+    const { name, email, cellphone, ubication, password } = submitData;
     let submittedData = {
       name: name,
       email: email,
-      password: "franquicia",
+      password: password,
       cellphone: cellphone,
       ubication: ubication,
     };
@@ -195,10 +203,21 @@ const FranchiseManagment = () => {
   const selectorDeleteUser = async () => {
     let newData = franchisesList.filter((item) => item.checked === true);
     let restData = franchisesList.filter((item) => item.checked !== true);
+    if (restData.length > 0) {
+      const arrIds = newData.map((item) => item.id);
+      deleteMany(arrIds)
+        .then(() =>
+          toast("Franquicias eliminadas con éxito", { type: "success" })
+        )
+        .catch((error) => toast("Algo ha salido mal!", { type: "error" }));
+      setFranchisesList([...restData]);
+      return;
+    }
     deleteOne(newData[0].id)
       .then(() => toast("Franquicia eliminada con éxito", { type: "success" }))
       .catch((error) => toast("Algo ha salido mal!", { type: "error" }));
     setFranchisesList([...restData]);
+    return;
   };
 
   // function to change the complete property of an item
@@ -211,6 +230,13 @@ const FranchiseManagment = () => {
     setFranchisesList([...newData]);
   };
 
+  const searchFranchisesByName = useCallback(() => {
+    getBySearch(
+      searchValue,
+      [(currentPage - 1) * itemPerPage, itemPerPage],
+      setFranchisesList
+    );
+  }, [searchValue, currentPage, itemPerPage]);
   // Get current list, pagination
   //const indexOfLastItem = currentPage * itemPerPage;
   //const indexOfFirstItem = indexOfLastItem - itemPerPage;
@@ -251,6 +277,16 @@ const FranchiseManagment = () => {
     );
     setFranchisesList(arr);
   };
+
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    /*getBySearch(
+      value,
+      [(currentPage - 1) * itemPerPage, itemPerPage],
+      setFranchisesList
+    );*/
+  };
   const { errors, register, handleSubmit } = useForm();
   return (
     <React.Fragment>
@@ -263,7 +299,7 @@ const FranchiseManagment = () => {
                 Franquicias
               </BlockTitle>
               <BlockDes className="text-soft">
-                <p>{`Actualmente hay ${franchisesList.length} franquicias.`}</p>
+                <p>{`Actualmente hay ${count} franquicias.`}</p>
               </BlockDes>
             </BlockHeadContent>
             <BlockHeadContent>
@@ -310,16 +346,25 @@ const FranchiseManagment = () => {
 
         <Block>
           <ToastContainer />
-          <Row className="justify-content-between">
-            <div className="w-15">
-              <label className="form-label">Filtrar por</label>
-              <RSelect
-                placeholder="Filtrar por"
-                options={filterCityNames()}
-                onChange={filterFranchisesByCityName}
-              />
+          <Row className="justify-content-between align-items-center">
+            <div className="w-25 d-flex align-items-start">
+              <FormGroup className="w-50">
+                <RSelect
+                  placeholder="Ciudad"
+                  options={filterCityNames()}
+                  onChange={filterFranchisesByCityName}
+                />
+              </FormGroup>
+              <FormGroup className="w-50 ml-2">
+                <input
+                  onChange={(e) => handleSearch(e)}
+                  type="search"
+                  className="form-control form-control-md "
+                  placeholder="Buscar"
+                />
+              </FormGroup>
             </div>
-            <div className="w-15 align-self-end">
+            <div className="w-15 ">
               <RSelect
                 placeholder="Mostrar de:"
                 options={[5, 10, 20].map((e) => ({ label: e, value: e }))}
@@ -641,6 +686,21 @@ const FranchiseManagment = () => {
                         placeholder="México"
                         name="ubication"
                         defaultValue={formData.ubication}
+                        ref={register({ required: "Este campo es requerido" })}
+                      />
+                      {errors.phone && (
+                        <span className="invalid">{errors.phone.message}</span>
+                      )}
+                    </FormGroup>
+                  </Col>
+                  <Col md="6" className="mt-2">
+                    <FormGroup>
+                      <label className="form-label">Contraseña</label>
+                      <input
+                        className="form-control"
+                        type="text"
+                        name="password"
+                        defaultValue={formData.password}
                         ref={register({ required: "Este campo es requerido" })}
                       />
                       {errors.phone && (

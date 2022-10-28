@@ -20,6 +20,22 @@ const userSlice = createSlice({
   },
 });
 
+const shipmentSlice = createSlice({
+  name: "shipmentPage",
+  initialState: {
+    currentPage: 0,
+    limit: 10,
+  },
+  reducers: {
+    setPage: (state, action) => {
+      state.currentPage = action.payload;
+    },
+    setLimit: (state, action) => {
+      state.limit = action.payload;
+    },
+  },
+});
+
 const ratingSlice = createSlice({
   name: "rating",
   initialState: {
@@ -74,6 +90,8 @@ const franchiseSlice = createSlice({
     },
   },
 });
+
+export const { setPage, setLimit } = shipmentSlice.actions;
 export const { setShipping } = shippingSlice.actions;
 export const { setUser } = userSlice.actions;
 export const { setPdf } = pdf.actions;
@@ -85,6 +103,7 @@ export const store = configureStore({
     rating: ratingSlice.reducer,
     shipping: shippingSlice.reducer,
     franchise: franchiseSlice.reducer,
+    shipmentPage: shipmentSlice.reducer,
     pdf: pdf.reducer,
   },
 });

@@ -43,7 +43,8 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 const CashierManagment = () => {
   const [token] = useCookie("token");
-  const { getAll, create, deleteOne, updateOne } = useUser("cashier");
+  const { getAll, create, deleteOne, updateOne, deleteMany } =
+    useUser("cashier");
   const { getAll: getAllFranchises } = useUser("franchise");
   const [cashiersList, setCashiersList] = useState([]);
   const [franchiseList, setFranchisesList] = useState([]);
@@ -52,6 +53,7 @@ const CashierManagment = () => {
   const [itemPerPage, setItemPerPage] = useState(10);
   const [currentFranchise, setCurrentFranchise] = useState(null);
   const user = useSelector((state) => state.user);
+  console.log(user);
   useEffect(() => {
     if (user.type === "admin") {
       getAll(
@@ -63,14 +65,13 @@ const CashierManagment = () => {
       return;
     }
     if (user.type === "franchise") {
-      console.log(user.type);
       getMe();
     }
-  }, [itemPerPage, currentPage]);
+  }, [itemPerPage, currentPage, user]);
 
   const getMe = async () => {
     try {
-      const resp = await axios.get("${process.env.REACT_APP_API_URL}/me", {
+      const resp = await axios.get(`${process.env.REACT_APP_API_URL}/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -148,17 +149,20 @@ const CashierManagment = () => {
 
   // submit function to add a new item
   const onFormSubmit = (submitData) => {
-    const { name, email } = submitData;
-    const { franchiseId } = formData;
+    const { name, email, password, franchiseId } = submitData;
+    //const { franchiseId } = formData;
     let submittedData = {
       name: name,
       email: email,
-      password: "Envioshop.22",
+      password: password,
       franchiseId: franchiseId,
     };
     create(submittedData)
       .then(() => toast("Cajero creado con éxito", { type: "success" }))
-      .catch(() => toast("Algo salió mal!", { type: "error" }));
+      .catch((error) => {
+        console.log(error);
+        toast("Algo salió mal!", { type: "error" });
+      });
     resetForm();
     setModal({ edit: false }, { add: false });
   };
@@ -215,14 +219,6 @@ const CashierManagment = () => {
     });
   };
 
-  // function to change to suspend property for an item
-  const suspendUser = (id) => {
-    let newData = cashiersList;
-    let index = newData.findIndex((item) => item.id === id);
-    newData[index].status = "Suspend";
-    setCashiersList([...newData]);
-  };
-
   // function to change the check property of an item
   const selectorCheck = (e) => {
     console.log(e);
@@ -238,10 +234,19 @@ const CashierManagment = () => {
   const selectorDeleteUser = async () => {
     let newData = cashiersList.filter((item) => item.checked === true);
     let restData = cashiersList.filter((item) => item.checked !== true);
+    if (restData.length > 0) {
+      const arrIds = newData.map((item) => item.id);
+      deleteMany(arrIds)
+        .then(() => toast("Cajeros eliminadas con éxito", { type: "success" }))
+        .catch((error) => toast("Algo ha salido mal!", { type: "error" }));
+      setFranchisesList([...restData]);
+      return;
+    }
     deleteOne(newData[0].id)
-      .then(() => toast("Cajero eliminado con éxito", { type: "success" }))
-      .catch(() => toast("Ups! Algo salió mal!", { type: "error" }));
-    setCashiersList([...restData]);
+      .then(() => toast("Franquicia eliminada con éxito", { type: "success" }))
+      .catch((error) => toast("Algo ha salido mal!", { type: "error" }));
+    setFranchisesList([...restData]);
+    return;
   };
 
   // function to change the complete property of an item
@@ -299,7 +304,7 @@ const CashierManagment = () => {
     exportFromJSON({ data, fileName, exportType });
   };
 
-  const { errors, register, handleSubmit, setValue, control } = useForm();
+  const { errors, register, handleSubmit, control } = useForm();
   return (
     <React.Fragment>
       <Head title="User List - Default"></Head>
@@ -359,11 +364,10 @@ const CashierManagment = () => {
         <Block>
           <ToastContainer />
           <Row className="justify-content-between">
-            <div className="w-15">
-              <label className="form-label">Filtrar por</label>
+            <div className="w-25">
               {user.type === "admin" ? (
                 <RSelect
-                  placeholder="Filtrar por"
+                  placeholder="Filtrar por nombre de franquicia"
                   options={filterFranchiseName()}
                   onChange={handleCashierNameFilterChange}
                 />
@@ -660,7 +664,7 @@ const CashierManagment = () => {
                       )}
                     </FormGroup>
                   </Col>
-                  <Col md="12" className="mt-2">
+                  <Col md="6" className="mt-2">
                     <FormGroup>
                       <label className="form-label">
                         Seleccionar franquicia
@@ -682,6 +686,26 @@ const CashierManagment = () => {
                           )}
                         />
                       </div>
+                    </FormGroup>
+                  </Col>
+                  <Col md="6" className="mt-2">
+                    <FormGroup>
+                      <label className="form-label">Contraseña</label>
+                      <input
+                        className="form-control"
+                        type="text"
+                        name="password"
+                        defaultValue={formData.password}
+                        placeholder="Enter email"
+                        ref={register({
+                          required: "Este campo es requerido",
+                        })}
+                      />
+                      {errors.password && (
+                        <span className="invalid">
+                          {errors.password.message}
+                        </span>
+                      )}
                     </FormGroup>
                   </Col>
                   <Col size="12" className="mt-4">

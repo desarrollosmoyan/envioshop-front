@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useCookie } from "react-use";
+import { useCallback } from "react";
 const useUser = (type) => {
   const [token] = useCookie("token");
   const request = axios.create({
@@ -35,10 +36,14 @@ const useUser = (type) => {
   };
   const deleteMany = async (ids) => {
     try {
-      const { data } = await request.delete(`/`);
-      //const { data } = await axios.put("/");
+      const body = ids;
+      const { data } = await request.delete(`/`, {
+        data: {
+          ids: body,
+        },
+      });
     } catch (error) {
-      console.log(error);
+      throw error;
     }
   };
   const updateOne = async (id, body, set = null) => {
@@ -63,7 +68,31 @@ const useUser = (type) => {
     }
   };
 
-  return { getAll, deleteOne, deleteMany, updateOne, create, getOne };
+  const getBySearch = async (value, [offset = 0, limit = 20], set = null) => {
+    try {
+      console.log(offset, limit);
+      const url = `/search/${value}?offset=${offset}&limit=${limit}`;
+      const { data } = await request({
+        method: "GET",
+        url: url,
+      });
+      if (!set) return data;
+      set(data.franchises);
+      console.log(data);
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  return {
+    getAll,
+    deleteOne,
+    deleteMany,
+    updateOne,
+    create,
+    getOne,
+    getBySearch,
+  };
 };
 
 export default useUser;
