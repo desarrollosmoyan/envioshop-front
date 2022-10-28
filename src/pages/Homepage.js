@@ -7,6 +7,7 @@ import StoreStatistics from "../components/partials/default/StoreStatistics";
 import RecentOrders from "../components/partials/default/recent-orders/RecentOrders";
 import TopProducts from "../components/partials/default/top-products/TopProducts";
 import DataCard from "../components/partials/default/DataCard";
+import EnvioshopLogo from "../images/logo.webp";
 import {
   DropdownToggle,
   DropdownMenu,
@@ -65,7 +66,9 @@ const Homepage = () => {
           <BlockBetween>
             <BlockHeadContent>
               <BlockTitle page tag="h3">
-                Dashboard
+                {user.type === "cashier"
+                  ? "Bienvenido al Sistema de Envioshop"
+                  : "Dashboard"}
               </BlockTitle>
             </BlockHeadContent>
             <BlockHeadContent>
@@ -86,45 +89,50 @@ const Homepage = () => {
             </BlockHeadContent>
           </BlockBetween>
         </BlockHead>
-        <Block>
-          <Row className="g-gs">
-            <Col xxl="3" sm="6">
-              <DataCard
-                title="Total de Envios"
-                percentChange={4}
-                up={true}
-                chart={<DefaultOrderChart />}
-                amount={stats ? stats.totalShipments : 0}
-              />
-            </Col>
-            <Col xxl="3" sm="6">
-              <DataCard
-                title="Total vendido"
-                percentChange={3}
-                up={false}
-                chart={<DefaultRevenueChart />}
-                amount={`$${stats ? stats.totalEarned : 0}`}
-              />
-            </Col>
-            <Col xxl="3" sm="6">
-              <DataCard
-                title="Franquicias registradas"
-                percentChange={"4.63"}
-                up={true}
-                chart={<DefaultCustomerChart />}
-                amount={stats ? stats.totalFranchises : 0}
-              />
-            </Col>
-            <Col xxl="3" sm="6">
-              <DataCard
-                title="Cajeros registrados"
-                percentChange={"4.63"}
-                up={true}
-                chart={<DefaultCustomerChart />}
-                amount={stats ? stats.totalCashiers : 0}
-              />
-            </Col>
-            {/*<Col xxl="6">
+        {user.type === "cashier" ? (
+          <div className=" d-flex align-items-center justify-content-center mt-5">
+            <img src={EnvioshopLogo} alt="logo" />
+          </div>
+        ) : (
+          <Block>
+            <Row className="g-gs">
+              <Col xxl="3" sm="6">
+                <DataCard
+                  title="Total de Envios"
+                  percentChange={4}
+                  up={true}
+                  chart={<DefaultOrderChart />}
+                  amount={stats ? stats.totalShipments : 0}
+                />
+              </Col>
+              <Col xxl="3" sm="6">
+                <DataCard
+                  title="Total vendido"
+                  percentChange={3}
+                  up={false}
+                  chart={<DefaultRevenueChart />}
+                  amount={`$${stats ? stats.totalEarned : 0}`}
+                />
+              </Col>
+              <Col xxl="3" sm="6">
+                <DataCard
+                  title="Franquicias registradas"
+                  percentChange={"4.63"}
+                  up={true}
+                  chart={<DefaultCustomerChart />}
+                  amount={stats ? stats.totalFranchises : 0}
+                />
+              </Col>
+              <Col xxl="3" sm="6">
+                <DataCard
+                  title="Cajeros registrados"
+                  percentChange={"4.63"}
+                  up={true}
+                  chart={<DefaultCustomerChart />}
+                  amount={stats ? stats.totalCashiers : 0}
+                />
+              </Col>
+              {/*<Col xxl="6">
               <SalesStatistics />
             </Col>
             <Col xxl="3" md="6">
@@ -133,16 +141,19 @@ const Homepage = () => {
             <Col xxl="3" md="6">
               <StoreStatistics />
                 </Col>*/}
-            <Col xxl="8">
-              <RecentOrders data={stats ? stats.recentShipments : []} />
-            </Col>
-            <Col xxl="4" md="8" lg="6">
-              {stats && stats.topFranchises ? (
-                <TopProducts topFranchises={stats ? stats.topFranchises : []} />
-              ) : null}
-            </Col>
-          </Row>
-        </Block>
+              <Col xxl="8">
+                <RecentOrders data={stats ? stats.recentShipments : []} />
+              </Col>
+              <Col xxl="4" md="8" lg="6">
+                {stats && stats.topFranchises ? (
+                  <TopProducts
+                    topFranchises={stats ? stats.topFranchises : []}
+                  />
+                ) : null}
+              </Col>
+            </Row>
+          </Block>
+        )}
       </Content>
     </React.Fragment>
   );

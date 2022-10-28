@@ -236,9 +236,6 @@ const ReactDataTable = ({
         data={tableData}
         columns={columns}
         className={className}
-        onChangePage={(page) => {
-          dispatch(setPage(page));
-        }}
         paginationTotalRows={count}
         selectableRows={selectableRows}
         selectableRowsComponent={CustomCheckbox}
@@ -261,14 +258,13 @@ const ReactDataTable = ({
           onChangePage,
           onChangeRowsPerPage,
         }) => {
-          console.log({ currentPage: currentPage });
           return (
             <DataTablePagination
               customItemPerPage={rowsPerPageS}
               itemPerPage={rowsPerPage}
               totalItems={rowCount}
               paginate={onChangePage}
-              currentPage={page}
+              currentPage={currentPage}
               onChangeRowsPerPage={onChangeRowsPerPage}
               setRowsPerPage={setRowsPerPage}
             />
