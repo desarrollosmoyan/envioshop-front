@@ -1,9 +1,18 @@
+<<<<<<< HEAD
 import classNames from "classnames";
 import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { useForm } from "react-hook-form";
 import { Button, Form, FormGroup, Input, Spinner } from "reactstrap";
 import Swal from "sweetalert2";
+=======
+import classNames from 'classnames';
+import React, { useEffect, useState } from 'react';
+import { useCookies } from 'react-cookie';
+import { useForm } from 'react-hook-form';
+import { Button, Form, FormGroup, Input, Spinner } from 'reactstrap';
+import Swal from 'sweetalert2';
+>>>>>>> 2512233002e7f09f6a2836b8c9ff98c526d72ca1
 import {
   Block,
   BlockHead,
@@ -12,10 +21,17 @@ import {
   Col,
   PreviewAltCard,
   Row,
+<<<<<<< HEAD
 } from "../../../../components/Component";
 import { request } from "../../../../constants";
 import Content from "../../../../layout/content/Content";
 import Head from "../../../../layout/head/Head";
+=======
+} from '../../../../components/Component';
+import { request } from '../../../../constants';
+import Content from '../../../../layout/content/Content';
+import Head from '../../../../layout/head/Head';
+>>>>>>> 2512233002e7f09f6a2836b8c9ff98c526d72ca1
 
 const Settings = () => {
   const [urls, setUrls] = useState(null);
@@ -23,6 +39,7 @@ const Settings = () => {
   const { register, errors, handleSubmit, formState, watch, getValues } =
     useForm({
       defaultValues: {
+<<<<<<< HEAD
         destinyPostalCode: "test",
       },
     });
@@ -32,6 +49,17 @@ const Settings = () => {
       const { data } = await request({
         method: "GET",
         url: "/settings",
+=======
+        destinyPostalCode: 'test',
+      },
+    });
+  const [token] = useCookies('token');
+  const getUrls = async () => {
+    try {
+      const { data } = await request({
+        method: 'GET',
+        url: '/settings',
+>>>>>>> 2512233002e7f09f6a2836b8c9ff98c526d72ca1
         headers: {
           Authorization: `Bearer ${token.token}`,
         },
@@ -57,6 +85,7 @@ const Settings = () => {
       );
       if (isEmpty)
         return Swal.fire(
+<<<<<<< HEAD
           "Ups!",
           "Todos los campos deben estar completos.",
           "error"
@@ -64,6 +93,15 @@ const Settings = () => {
       const { data } = await request({
         method: "PUT",
         url: "/settings",
+=======
+          'Ups!',
+          'Todos los campos deben estar completos.',
+          'error'
+        );
+      const { data } = await request({
+        method: 'PUT',
+        url: '/settings',
+>>>>>>> 2512233002e7f09f6a2836b8c9ff98c526d72ca1
         data: values,
         headers: {
           Authorization: `Bearer ${token.token}`,
@@ -115,7 +153,7 @@ const Settings = () => {
                           errors={errors}
                           defaultValue={urls.DHL}
                           ref={register({
-                            required: "URL requerida",
+                            required: 'URL requerida',
                           })}
                         />
                       </div>
@@ -139,7 +177,7 @@ const Settings = () => {
                         errors={errors}
                         defaultValue={urls.FEDEX}
                         ref={register({
-                          required: "URL requerida",
+                          required: 'URL requerida',
                         })}
                       />
                     </FormGroup>
@@ -185,7 +223,7 @@ const Settings = () => {
                           placeholder="https://wwwcie.ups.com"
                           errors={errors}
                           ref={register({
-                            required: "URL requerida",
+                            required: 'URL requerida',
                           })}
                         />
                       </div>
@@ -201,7 +239,7 @@ const Settings = () => {
                         ) : (
                           <Spinner
                             className={classNames({
-                              "position-relative": true,
+                              'position-relative': true,
                               visible: isSubmitting,
                               invisible: !isSubmitting,
                             })}
