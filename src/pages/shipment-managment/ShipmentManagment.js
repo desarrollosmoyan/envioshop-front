@@ -1,6 +1,6 @@
-import React from 'react';
-import Head from '../../layout/head/Head';
-import Content from '../../layout/content/Content';
+import React from "react";
+import Head from "../../layout/head/Head";
+import Content from "../../layout/content/Content";
 import {
   BlockBetween,
   BlockHead,
@@ -8,44 +8,51 @@ import {
   BlockTitle,
   BlockDes,
   Block,
-} from '../../components/Component';
-import useAxios from '../../hooks/useAxios';
-import { defaultShipmentData } from '../../constants';
-import useShipment from '../../hooks/useShipment';
-import { ReactDataTable } from '../../components/Component';
-import { useEffect, useState } from 'react';
-import { Button } from 'reactstrap';
+} from "../../components/Component";
+import useAxios from "../../hooks/useAxios";
+import { defaultShipmentData } from "../../constants";
+import useShipment from "../../hooks/useShipment";
+import { ReactDataTable } from "../../components/Component";
+import { useEffect, useState } from "react";
+import { Button } from "reactstrap";
+import { useSelector } from "react-redux";
+import { request } from "../../constants";
+import { useCookie } from "react-use";
+//import toast from "react-toastify";
 export default function ShipmentManagment() {
-  const { getAll } = useShipment();
-
+  const [count, setCount] = useState(0);
+  const { getAll, getCount } = useShipment();
+  const [token] = useCookie("token");
+  const { currentPage, limit } = useSelector((state) => state.shipmentPage);
+  //const [currentFranchise, setCurrentFranchise] = useState({});
   const columns = [
     {
-      name: 'Empresa',
+      name: "Empresa",
       selector: (row) => row?.serviceName,
     },
     {
-      name: 'Servicio',
+      name: "Servicio",
       selector: (row) => row?.serviceType,
     },
     {
-      name: 'Precio',
+      name: "Precio",
       selector: (row) => row?.shipmentPrice,
     },
     {
-      name: 'Franquicia',
+      name: "Franquicia",
       selector: (row) => row?.franchise?.name,
     },
     {
-      name: 'Cajero',
+      name: "Cajero",
       selector: (row) => row?.Turn?.cashier?.name,
     },
     {
-      name: 'Fecha y Hora',
+      name: "Fecha y Hora",
       selector: (row) => new Date(row.createdAt).toLocaleString(),
       sortable: true,
     },
     {
-      name: 'Documento',
+      name: "Documento",
       cell: (row) => (
         <a
           download={`Documento-Envio-${new Date(
@@ -57,25 +64,42 @@ export default function ShipmentManagment() {
           <Button color="primary">Descargar PDF</Button>
         </a>
       ),
-      selector: (row) => 'Descargar Documento',
+      selector: (row) => "Descargar Documento",
     },
   ];
-
-  const downloadPDF = (pdfInBase64) => {
-    const linkSource = `data:application/pdf;base64,${pdfInBase64}`;
-  };
-  const [cols, setCols] = useState(columns);
+  const user = useSelector((state) => state.user);
+  const [cols] = useState(columns);
   const [sales, setSalesList] = useState([]);
   useEffect(() => {
-    getAll([0, 20], setSalesList);
-  }, []);
+    if (user.type === "admin") {
+      getAll([(currentPage - 1) * limit, limit], setSalesList, setCount);
+    } else {
+      getMe();
+    }
+  }, [currentPage, limit]);
+
+  const getMe = async () => {
+    try {
+      const { data } = await request({
+        method: "GET",
+        url: "/me",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(data.user);
+      setSalesList(data.user.sales);
+    } catch (error) {
+      //toast("Algo salió mal!", { type: "error" });
+    }
+  };
   const keyMap = {
-    serviceName: 'Empresa',
-    serviceType: 'Servicio',
-    price: 'Precio',
-    franchise: 'Franquicia',
-    cashier: 'Cajero',
-    createdAt: 'Fecha y Hora',
+    serviceName: "Empresa",
+    serviceType: "Servicio",
+    price: "Precio",
+    franchise: "Franquicia",
+    cashier: "Cajero",
+    createdAt: "Fecha y Hora",
   };
   return (
     <>
@@ -88,7 +112,7 @@ export default function ShipmentManagment() {
                 Gestión de envios
               </BlockTitle>
               <BlockDes>
-                <p>{`Actualmente hay ${sales.length} envios.`}</p>
+                <p>{`Actualmente hay ${count} envios.`}</p>
               </BlockDes>
             </BlockHeadContent>
             <BlockHeadContent></BlockHeadContent>
@@ -100,6 +124,7 @@ export default function ShipmentManagment() {
               keyMap={keyMap}
               data={sales}
               columns={cols}
+              count={count}
               expandableRows
               pagination
               actions

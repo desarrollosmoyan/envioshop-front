@@ -2,8 +2,11 @@ import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import exportFromJSON from "export-from-json";
 import CopyToClipboard from "react-copy-to-clipboard";
-import { Col, Modal, ModalBody, Row, Button } from "reactstrap";
+import { Col, Modal, ModalBody, Row, Button, Spinner } from "reactstrap";
 import { DataTablePagination } from "../Component";
+import { setLimit, setPage } from "../../store/store";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 const Export = ({ data }) => {
   const [modal, setModal] = useState(false);
@@ -123,13 +126,21 @@ const ReactDataTable = ({
   selectableRows,
   expandableRows,
   keyMap,
+  count,
 }) => {
   const [tableData, setTableData] = useState(data);
   const [searchText, setSearchText] = useState("");
   const [rowsPerPageS, setRowsPerPage] = useState(10);
   const [mobileView, setMobileView] = useState();
   const [exportData, setExportData] = useState([]);
+  const dispatch = useDispatch();
+  const page = useSelector((state) => state.shipmentPage.currentPage);
+  console.log(page);
 
+  useEffect(() => {
+    console.log("render 1");
+    dispatch(setLimit(rowsPerPageS));
+  }, [rowsPerPageS]);
   useEffect(() => {
     if (!keyMap) return;
     const arr = data.map((element) => {
@@ -225,11 +236,17 @@ const ReactDataTable = ({
         data={tableData}
         columns={columns}
         className={className}
+        onChangePage={(page) => {
+          dispatch(setPage(page));
+        }}
+        paginationTotalRows={count}
         selectableRows={selectableRows}
         selectableRowsComponent={CustomCheckbox}
         expandableRowsComponent={ExpandableRowComponent}
         expandableRows={mobileView}
-        noDataComponent={<div className="p-2">There are no records found</div>}
+        noDataComponent={
+          <div className="p-2">No hay información para mostrar</div>
+        }
         sortIcon={
           <div>
             <span>&darr;</span>
@@ -243,17 +260,20 @@ const ReactDataTable = ({
           rowCount,
           onChangePage,
           onChangeRowsPerPage,
-        }) => (
-          <DataTablePagination
-            customItemPerPage={rowsPerPageS}
-            itemPerPage={rowsPerPage}
-            totalItems={rowCount}
-            paginate={onChangePage}
-            currentPage={currentPage}
-            onChangeRowsPerPage={onChangeRowsPerPage}
-            setRowsPerPage={setRowsPerPage}
-          />
-        )}
+        }) => {
+          console.log({ currentPage: currentPage });
+          return (
+            <DataTablePagination
+              customItemPerPage={rowsPerPageS}
+              itemPerPage={rowsPerPage}
+              totalItems={rowCount}
+              paginate={onChangePage}
+              currentPage={page}
+              onChangeRowsPerPage={onChangeRowsPerPage}
+              setRowsPerPage={setRowsPerPage}
+            />
+          );
+        }}
       ></DataTable>
     </div>
   );

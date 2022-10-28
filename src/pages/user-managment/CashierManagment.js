@@ -41,17 +41,23 @@ import exportFromJSON from "export-from-json";
 import { useCookie } from "react-use";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { components } from "react-select";
 const CashierManagment = () => {
   const [token] = useCookie("token");
-  const { getAll, create, deleteOne, updateOne } = useUser("cashier");
+  const { getAll, create, deleteOne, updateOne, deleteMany } =
+    useUser("cashier");
   const { getAll: getAllFranchises } = useUser("franchise");
   const [cashiersList, setCashiersList] = useState([]);
   const [franchiseList, setFranchisesList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [count, setCount] = useState(0);
   const [itemPerPage, setItemPerPage] = useState(10);
+  const [itemPerList, setItemPerList] = useState(5);
+  const [listPage, setListPage] = useState(0);
   const [currentFranchise, setCurrentFranchise] = useState(null);
+  const [franchiseCount, setFranchiseCount] = useState(0);
   const user = useSelector((state) => state.user);
+  console.log(user);
   useEffect(() => {
     if (user.type === "admin") {
       getAll(
@@ -59,18 +65,21 @@ const CashierManagment = () => {
         setCashiersList,
         setCount
       );
-      getAllFranchises([0, 20], setFranchisesList);
+      getAllFranchises(
+        [listPage * itemPerList, itemPerList],
+        setFranchisesList,
+        setFranchiseCount
+      );
       return;
     }
     if (user.type === "franchise") {
-      console.log(user.type);
       getMe();
     }
-  }, [itemPerPage, currentPage]);
+  }, [itemPerPage, currentPage, user, listPage, itemPerList]);
 
   const getMe = async () => {
     try {
-      const resp = await axios.get("${process.env.REACT_APP_API_URL}/me", {
+      const resp = await axios.get(`${process.env.REACT_APP_API_URL}/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -148,17 +157,20 @@ const CashierManagment = () => {
 
   // submit function to add a new item
   const onFormSubmit = (submitData) => {
-    const { name, email } = submitData;
-    const { franchiseId } = formData;
+    const { name, email, password, franchiseId } = submitData;
+    //const { franchiseId } = formData;
     let submittedData = {
       name: name,
       email: email,
-      password: "Envioshop.22",
+      password: password,
       franchiseId: franchiseId,
     };
     create(submittedData)
       .then(() => toast("Cajero creado con éxito", { type: "success" }))
-      .catch(() => toast("Algo salió mal!", { type: "error" }));
+      .catch((error) => {
+        console.log(error);
+        toast("Algo salió mal!", { type: "error" });
+      });
     resetForm();
     setModal({ edit: false }, { add: false });
   };
@@ -215,14 +227,6 @@ const CashierManagment = () => {
     });
   };
 
-  // function to change to suspend property for an item
-  const suspendUser = (id) => {
-    let newData = cashiersList;
-    let index = newData.findIndex((item) => item.id === id);
-    newData[index].status = "Suspend";
-    setCashiersList([...newData]);
-  };
-
   // function to change the check property of an item
   const selectorCheck = (e) => {
     console.log(e);
@@ -238,44 +242,28 @@ const CashierManagment = () => {
   const selectorDeleteUser = async () => {
     let newData = cashiersList.filter((item) => item.checked === true);
     let restData = cashiersList.filter((item) => item.checked !== true);
+    if (restData.length > 0) {
+      const arrIds = newData.map((item) => item.id);
+      deleteMany(arrIds)
+        .then(() => toast("Cajeros eliminadas con éxito", { type: "success" }))
+        .catch((error) => toast("Algo ha salido mal!", { type: "error" }));
+      setFranchisesList([...restData]);
+      return;
+    }
     deleteOne(newData[0].id)
-      .then(() => toast("Cajero eliminado con éxito", { type: "success" }))
-      .catch(() => toast("Ups! Algo salió mal!", { type: "error" }));
-    setCashiersList([...restData]);
+      .then(() => toast("Franquicia eliminada con éxito", { type: "success" }))
+      .catch((error) => toast("Algo ha salido mal!", { type: "error" }));
+    setFranchisesList([...restData]);
+    return;
   };
 
   // function to change the complete property of an item
-  const selectorSuspendUser = () => {
-    let newData;
-    newData = cashiersList.map((item) => {
-      if (item.checked === true) item.status = "Suspend";
-      return item;
-    });
-    setCashiersList([...newData]);
-  };
-
   // Get current list, pagination
   const indexOfLastItem = currentPage * itemPerPage;
   const indexOfFirstItem = indexOfLastItem - itemPerPage;
   const currentItems = cashiersList;
   // Change Page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  const filterFranchiseName = () => {
-    console.log(cashiersList);
-    const arr = cashiersList
-      .filter(
-        (cashier, index, arr) =>
-          index ===
-          arr.findIndex((t) => t.franchise.name === cashier.franchise.name)
-      )
-      .map((cashier) => ({
-        value: cashier.franchise.name,
-        label: cashier.franchise.name,
-      }));
-    return arr;
-  };
-
   const handleCashierNameFilterChange = (e) => {
     const value = e.value;
     const arr = cashiersList.filter((cashier) =>
@@ -299,7 +287,36 @@ const CashierManagment = () => {
     exportFromJSON({ data, fileName, exportType });
   };
 
-  const { errors, register, handleSubmit, setValue, control } = useForm();
+  const onLoadMoreFranchises = () => {
+    setItemPerList(itemPerList + 10);
+  };
+
+  const onChangeFranchise = (e) => {
+    console.log(e.value);
+    const franchiseId = user.type === "admin" ? e.value : currentFranchise.id;
+    getAllCashiersFromOneFranchise(franchiseId);
+  };
+  const getAllCashiersFromOneFranchise = async (id) => {
+    console.log(token);
+    try {
+      const { data } = await axios({
+        method: "POST",
+        url: `${process.env.REACT_APP_API_URL}/user/cashier/${id}`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          offset: 0,
+          limit: itemPerPage,
+        },
+      });
+      setCashiersList(data.cashiers);
+    } catch (error) {
+      console.log(error);
+      toast("Algo salió mal!", { type: "error" });
+    }
+  };
+  const { errors, register, handleSubmit, control } = useForm();
   return (
     <React.Fragment>
       <Head title="User List - Default"></Head>
@@ -360,12 +377,22 @@ const CashierManagment = () => {
           <ToastContainer />
           <Row className="justify-content-between">
             <div className="w-15">
-              <label className="form-label">Filtrar por</label>
               {user.type === "admin" ? (
                 <RSelect
-                  placeholder="Filtrar por"
-                  options={filterFranchiseName()}
-                  onChange={handleCashierNameFilterChange}
+                  placeholder="Filtrar por nombre de franquicia"
+                  options={franchiseList.map((item) => ({
+                    value: item.id,
+                    label: item.name,
+                  }))}
+                  onChange={onChangeFranchise}
+                  components={{
+                    MenuList: (menuListProps) => (
+                      <SelectMenuButton
+                        {...menuListProps}
+                        onLoadMoreFranchises={onLoadMoreFranchises}
+                      />
+                    ),
+                  }}
                 />
               ) : null}
             </div>
@@ -660,7 +687,7 @@ const CashierManagment = () => {
                       )}
                     </FormGroup>
                   </Col>
-                  <Col md="12" className="mt-2">
+                  <Col md="6" className="mt-2">
                     <FormGroup>
                       <label className="form-label">
                         Seleccionar franquicia
@@ -682,6 +709,26 @@ const CashierManagment = () => {
                           )}
                         />
                       </div>
+                    </FormGroup>
+                  </Col>
+                  <Col md="6" className="mt-2">
+                    <FormGroup>
+                      <label className="form-label">Contraseña</label>
+                      <input
+                        className="form-control"
+                        type="text"
+                        name="password"
+                        defaultValue={formData.password}
+                        placeholder="Enter email"
+                        ref={register({
+                          required: "Este campo es requerido",
+                        })}
+                      />
+                      {errors.password && (
+                        <span className="invalid">
+                          {errors.password.message}
+                        </span>
+                      )}
                     </FormGroup>
                   </Col>
                   <Col size="12" className="mt-4">
@@ -831,6 +878,24 @@ const CashierManagment = () => {
         </Modal>
       </Content>
     </React.Fragment>
+  );
+};
+
+const SelectMenuButton = ({ onLoadMoreFranchises, ...props }) => {
+  return (
+    <components.MenuList {...props}>
+      {props.children}
+      <div className="w-100 d-flex aling-items-center justify-content-center">
+        <Button
+          onClick={onLoadMoreFranchises}
+          className=""
+          color="primary"
+          size="xs"
+        >
+          Cargar más
+        </Button>
+      </div>
+    </components.MenuList>
   );
 };
 

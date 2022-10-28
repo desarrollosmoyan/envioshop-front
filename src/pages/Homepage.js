@@ -33,14 +33,15 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { useCookie } from "react-use";
+import { useSelector } from "react-redux";
 const Homepage = () => {
   const [sm, updateSm] = useState(false);
   const [token] = useCookie("token");
   const [stats, setStats] = useState();
+  const user = useSelector((state) => state.user);
   useEffect(() => {
     getStats();
   }, []);
-
   const getStats = async () => {
     try {
       const url = `${process.env.REACT_APP_API_URL}/stats`;
@@ -136,7 +137,9 @@ const Homepage = () => {
               <RecentOrders data={stats ? stats.recentShipments : []} />
             </Col>
             <Col xxl="4" md="8" lg="6">
-              <TopProducts topFranchises={stats ? stats.topFranchises : []} />
+              {stats && stats.topFranchises ? (
+                <TopProducts topFranchises={stats ? stats.topFranchises : []} />
+              ) : null}
             </Col>
           </Row>
         </Block>

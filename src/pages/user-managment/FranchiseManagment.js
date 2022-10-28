@@ -29,6 +29,7 @@ import {
   PreviewAltCard,
   RSelect,
 } from "../../components/Component";
+import { components } from "react-select";
 import Content from "../../layout/content/Content";
 import Head from "../../layout/head/Head";
 import { userData } from "./UserData";
@@ -38,20 +39,91 @@ import { useForm } from "react-hook-form";
 import { toast, ToastContainer } from "react-toastify";
 import useUser from "../../hooks/useUser";
 import exportFromJSON from "export-from-json";
+import { useCallback } from "react";
+import axios from "axios";
+import { useCookie } from "react-use";
 const FranchiseManagment = () => {
-  const { getAll, create, deleteOne, updateOne } = useUser("franchise");
+  const {
+    getAll,
+    create,
+    deleteOne,
+    updateOne,
+    deleteMany,
+    getBySearch,
+    getByCityName,
+  } = useUser("franchise");
+  const [token] = useCookie("token");
   const [franchisesList, setFranchisesList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemPerPage, setItemPerPage] = useState(5);
+  const [itemPerList, setItemPerList] = useState(10);
+  const [cityPage] = useState(1);
   const [count, setCount] = useState(0);
+  const [cityName, setCityName] = useState("");
+  const [cityList, setCityList] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
   useEffect(() => {
+    console.log("executing");
     getAll(
       [(currentPage - 1) * itemPerPage, itemPerPage],
       setFranchisesList,
       setCount
     );
   }, [itemPerPage, currentPage]);
-  console.log(currentPage);
+  useEffect(() => {
+    searchFranchisesByName();
+  }, [searchValue, currentPage, itemPerPage]);
+
+  useEffect(() => {
+    console.log("executing");
+    filterByCityName();
+  }, [cityPage, itemPerList]);
+
+  const filterByCityName = useCallback(() => {
+    getByCityName([(cityPage - 1) * itemPerList, itemPerList], setCityList);
+  }, [cityPage, itemPerList]);
+
+  useEffect(() => {
+    if (cityName.length < 3) return;
+
+    getAllFranchisesByCity(
+      [(currentPage - 1) * itemPerPage, itemPerPage],
+      setFranchisesList,
+      setCount,
+      cityName
+    );
+  }, [cityName]);
+
+  const getAllFranchisesByCity = async (
+    [offset, limit],
+    set,
+    setCount,
+    cityName
+  ) => {
+    try {
+      const { data } = await axios({
+        method: "POST",
+        url: `${process.env.REACT_APP_API_URL}/user/franchise/search`,
+        params: {
+          offset: offset,
+          limit: limit,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        data: {
+          cityName: cityName,
+        },
+      });
+      set(data.franchises);
+      setCount(data.total);
+    } catch (error) {
+      toast("Algo salió mal!", { type: "error" });
+    }
+  };
+
+  console.log(franchisesList);
+
   const [sm, updateSm] = useState(false);
   const [onSearchText] = useState("");
   const [modal, setModal] = useState({
@@ -76,7 +148,7 @@ const FranchiseManagment = () => {
     setFranchisesList([...newData]);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   // Changing state value when searching name
-  useEffect(() => {
+  /* useEffect(() => {
     if (onSearchText !== "") {
       const filteredObject = userData.filter((item) => {
         return (
@@ -88,7 +160,7 @@ const FranchiseManagment = () => {
     } else {
       setFranchisesList([]);
     }
-  }, [onSearchText, setFranchisesList]);
+  }, [onSearchText, setFranchisesList]);*/
 
   // function to change the selected property of an item
   const onSelectChange = (e, id) => {
@@ -116,11 +188,11 @@ const FranchiseManagment = () => {
 
   // submit function to add a new item
   const onFormSubmit = (submitData) => {
-    const { name, email, cellphone, ubication } = submitData;
+    const { name, email, cellphone, ubication, password } = submitData;
     let submittedData = {
       name: name,
       email: email,
-      password: "franquicia",
+      password: password,
       cellphone: cellphone,
       ubication: ubication,
     };
@@ -195,10 +267,21 @@ const FranchiseManagment = () => {
   const selectorDeleteUser = async () => {
     let newData = franchisesList.filter((item) => item.checked === true);
     let restData = franchisesList.filter((item) => item.checked !== true);
+    if (restData.length > 0) {
+      const arrIds = newData.map((item) => item.id);
+      deleteMany(arrIds)
+        .then(() =>
+          toast("Franquicias eliminadas con éxito", { type: "success" })
+        )
+        .catch((error) => toast("Algo ha salido mal!", { type: "error" }));
+      setFranchisesList([...restData]);
+      return;
+    }
     deleteOne(newData[0].id)
       .then(() => toast("Franquicia eliminada con éxito", { type: "success" }))
       .catch((error) => toast("Algo ha salido mal!", { type: "error" }));
     setFranchisesList([...restData]);
+    return;
   };
 
   // function to change the complete property of an item
@@ -211,6 +294,14 @@ const FranchiseManagment = () => {
     setFranchisesList([...newData]);
   };
 
+  const searchFranchisesByName = useCallback(() => {
+    if (searchValue.length < 3) return;
+    getBySearch(
+      searchValue,
+      [(currentPage - 1) * itemPerPage, itemPerPage],
+      setFranchisesList
+    );
+  }, [searchValue, currentPage, itemPerPage]);
   // Get current list, pagination
   //const indexOfLastItem = currentPage * itemPerPage;
   //const indexOfFirstItem = indexOfLastItem - itemPerPage;
@@ -228,28 +319,37 @@ const FranchiseManagment = () => {
     const exportType = exportFromJSON.types.csv;
     exportFromJSON({ data, fileName, exportType });
   };
-
+  /*useEffect(() => {
+    if (cityName === "") return;
+    getAll(
+      [(cityPage - 1) * itemPerList, itemPerList],
+      setFranchisesList,
+      setCount,
+      cityName
+    ).catch((error) => console.log(error));
+  }, [cityName]);*/
+  //console.log(franchisesList);
   // Change Page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const filterCityNames = () => {
-    const arr = franchisesList
-      .filter(
-        (franchise, index, arr) =>
-          index === arr.findIndex((t) => t.ubication === franchise.ubication)
-      )
-      .map((franchise) => ({
-        value: franchise.ubication,
-        label: franchise.ubication,
-      }));
-    return arr;
-  };
   const filterFranchisesByCityName = (e) => {
     const value = e.value;
-    const arr = franchisesList.filter((franchise) =>
-      franchise.ubication === value ? true : false
-    );
-    setFranchisesList(arr);
+    console.log(value);
+    setCityName(value);
+  };
+
+  const onLoadMoreCities = () => {
+    setItemPerList(itemPerList + 5);
+  };
+
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    /*getBySearch(
+      value,
+      [(currentPage - 1) * itemPerPage, itemPerPage],
+      setFranchisesList
+    );*/
   };
   const { errors, register, handleSubmit } = useForm();
   return (
@@ -263,7 +363,7 @@ const FranchiseManagment = () => {
                 Franquicias
               </BlockTitle>
               <BlockDes className="text-soft">
-                <p>{`Actualmente hay ${franchisesList.length} franquicias.`}</p>
+                <p>{`Actualmente hay ${count} franquicias.`}</p>
               </BlockDes>
             </BlockHeadContent>
             <BlockHeadContent>
@@ -310,16 +410,37 @@ const FranchiseManagment = () => {
 
         <Block>
           <ToastContainer />
-          <Row className="justify-content-between">
-            <div className="w-15">
-              <label className="form-label">Filtrar por</label>
-              <RSelect
-                placeholder="Filtrar por"
-                options={filterCityNames()}
-                onChange={filterFranchisesByCityName}
-              />
+          <Row className="justify-content-between align-items-center">
+            <div className="w-25 d-flex align-items-start">
+              <FormGroup className="w-50">
+                <RSelect
+                  placeholder="Ciudad"
+                  options={
+                    cityList.length > 0
+                      ? cityList.map((item) => ({ label: item, value: item }))
+                      : []
+                  }
+                  components={{
+                    MenuList: (menuListProps) => (
+                      <SelectMenuButton
+                        {...menuListProps}
+                        onLoadMoreCities={onLoadMoreCities}
+                      />
+                    ),
+                  }}
+                  onChange={filterFranchisesByCityName}
+                />
+              </FormGroup>
+              <FormGroup className="w-50 ml-2">
+                <input
+                  onChange={(e) => handleSearch(e)}
+                  type="search"
+                  className="form-control form-control-md "
+                  placeholder="Buscar"
+                />
+              </FormGroup>
             </div>
-            <div className="w-15 align-self-end">
+            <div className="w-15 ">
               <RSelect
                 placeholder="Mostrar de:"
                 options={[5, 10, 20].map((e) => ({ label: e, value: e }))}
@@ -648,6 +769,21 @@ const FranchiseManagment = () => {
                       )}
                     </FormGroup>
                   </Col>
+                  <Col md="6" className="mt-2">
+                    <FormGroup>
+                      <label className="form-label">Contraseña</label>
+                      <input
+                        className="form-control"
+                        type="text"
+                        name="password"
+                        defaultValue={formData.password}
+                        ref={register({ required: "Este campo es requerido" })}
+                      />
+                      {errors.phone && (
+                        <span className="invalid">{errors.phone.message}</span>
+                      )}
+                    </FormGroup>
+                  </Col>
                   <Col size="12" className="mt-2">
                     <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
                       <li>
@@ -798,6 +934,24 @@ const FranchiseManagment = () => {
         </Modal>
       </Content>
     </React.Fragment>
+  );
+};
+
+const SelectMenuButton = ({ onLoadMoreCities, ...props }) => {
+  return (
+    <components.MenuList {...props}>
+      {props.children}
+      <div className="w-100 d-flex aling-items-center justify-content-center">
+        <Button
+          onClick={onLoadMoreCities}
+          className=""
+          color="primary"
+          size="xs"
+        >
+          Cargar más
+        </Button>
+      </div>
+    </components.MenuList>
   );
 };
 

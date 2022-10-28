@@ -644,7 +644,7 @@ const menu = [
     text: "Tablero",
     link: "/",
     newTab: false,
-    role: { admin: true, franchise: false, cashier: false },
+    role: { admin: true, franchise: true, cashier: false },
   },
   {
     icon: "user-list-fill",
@@ -689,7 +689,7 @@ const menu = [
         text: "Envios",
         icon: "building-fill",
         link: "/shipments/managment",
-        role: { admin: true, franchise: false, cashier: false },
+        role: { admin: true, franchise: true, cashier: false },
       },
     ],
   },

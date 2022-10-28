@@ -17,11 +17,14 @@ const useShipment = () => {
       throw error;
     }
   };
-  const getAll = async ([offset, limit], set) => {
+  const getAll = async ([offset, limit], set, setCount) => {
     try {
       const url = `/?offset=${offset}&limit=${limit}`;
       const { data } = await request.get(url);
       set(data.salesList);
+      if (setCount) {
+        setCount(data.count);
+      }
     } catch (error) {
       throw error;
     }
@@ -42,7 +45,20 @@ const useShipment = () => {
       throw error;
     }
   };
-  return { create, getAll, deleteOne };
+  const getCount = async (id, set) => {
+    try {
+      let url = "/";
+      if (id) {
+        url = `/${id}`;
+      }
+      const { data } = await request.get(url);
+      set(data);
+      set(data);
+    } catch (error) {
+      throw error;
+    }
+  };
+  return { create, getAll, deleteOne, getCount };
 };
 
 export default useShipment;
