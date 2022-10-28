@@ -17,9 +17,13 @@ const useShipment = () => {
       throw error;
     }
   };
-  const getAll = async ([offset, limit], set, setCount) => {
+  const getAll = async (
+    [offset, limit, svcName = "", lte = "", gte = ""],
+    set,
+    setCount
+  ) => {
     try {
-      const url = `/?offset=${offset}&limit=${limit}`;
+      const url = `/?offset=${offset}&limit=${limit}&serviceName=${svcName}&lte=${lte}&gte=${gte}`;
       const { data } = await request.get(url);
       set(data.salesList);
       if (setCount) {
@@ -37,11 +41,17 @@ const useShipment = () => {
       throw error;
     }
   };
-
-  const deleteMany = async (ids) => {
+  const getAllFranchisesWithSales = async ([offset = 0, limit = 0], set) => {
     try {
-      //const url = `/${}`;
+      const { data } = await request({
+        method: "POST",
+        url: `/franchises?offset=${offset}&limit=${limit}`,
+      });
+      if (!set) return data;
+      console.log(data);
+      set(data.franchises);
     } catch (error) {
+      console.log(error);
       throw error;
     }
   };
@@ -58,7 +68,7 @@ const useShipment = () => {
       throw error;
     }
   };
-  return { create, getAll, deleteOne, getCount };
+  return { create, getAll, deleteOne, getCount, getAllFranchisesWithSales };
 };
 
 export default useShipment;

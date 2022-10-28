@@ -127,20 +127,17 @@ const ReactDataTable = ({
   expandableRows,
   keyMap,
   count,
+  limit,
+  page,
+  setLimit,
+  setPage,
 }) => {
   const [tableData, setTableData] = useState(data);
   const [searchText, setSearchText] = useState("");
-  const [rowsPerPageS, setRowsPerPage] = useState(10);
+  //const [rowsPerPageS, setRowsPerPage] = useState(10);
   const [mobileView, setMobileView] = useState();
   const [exportData, setExportData] = useState([]);
-  const dispatch = useDispatch();
-  const page = useSelector((state) => state.shipmentPage.currentPage);
-  console.log(page);
 
-  useEffect(() => {
-    console.log("render 1");
-    dispatch(setLimit(rowsPerPageS));
-  }, [rowsPerPageS]);
   useEffect(() => {
     if (!keyMap) return;
     const arr = data.map((element) => {
@@ -217,8 +214,11 @@ const ReactDataTable = ({
                     <select
                       name="DataTables_Table_0_length"
                       className="custom-select custom-select-sm form-control form-control-sm"
-                      onChange={(e) => setRowsPerPage(e.target.value)}
-                      value={rowsPerPageS}
+                      onChange={(e) => {
+                        setPage(2);
+                        setLimit(parseInt(e.target.value));
+                      }}
+                      value={limit}
                     >
                       <option value="10">10</option>
                       <option value="25">25</option>
@@ -241,6 +241,7 @@ const ReactDataTable = ({
         selectableRowsComponent={CustomCheckbox}
         expandableRowsComponent={ExpandableRowComponent}
         expandableRows={mobileView}
+        onChangePage={(page) => setPage(page)}
         noDataComponent={
           <div className="p-2">No hay información para mostrar</div>
         }
@@ -260,13 +261,13 @@ const ReactDataTable = ({
         }) => {
           return (
             <DataTablePagination
-              customItemPerPage={rowsPerPageS}
-              itemPerPage={rowsPerPage}
+              customItemPerPage={limit}
+              itemPerPage={limit}
               totalItems={rowCount}
               paginate={onChangePage}
-              currentPage={currentPage}
+              currentPage={page}
               onChangeRowsPerPage={onChangeRowsPerPage}
-              setRowsPerPage={setRowsPerPage}
+              setRowsPerPage={(rows) => setLimit(rows)}
             />
           );
         }}

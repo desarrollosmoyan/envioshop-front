@@ -7,7 +7,8 @@ import {
   Row,
   Col,
 } from "reactstrap";
-
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 const DataTablePagination = ({
   itemPerPage,
   totalItems,
