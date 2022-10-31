@@ -55,9 +55,11 @@ const CashierManagment = () => {
   const [itemPerList, setItemPerList] = useState(5);
   const [listPage, setListPage] = useState(0);
   const [currentFranchise, setCurrentFranchise] = useState(null);
+  const [selectedFranchise, setSelectedFranchise] = useState(null);
   const [franchiseCount, setFranchiseCount] = useState(0);
   const user = useSelector((state) => state.user);
   console.log(user);
+  console.log({ currentFranchise });
   useEffect(() => {
     if (user.type === "admin") {
       getAll(
@@ -154,7 +156,21 @@ const CashierManagment = () => {
     setModal({ edit: false, add: false });
     resetForm();
   };
-
+  const refetchData = async () => {
+    if (user.type === "franchise") return getMe();
+    if (selectedFranchise)
+      return getAllCashiersFromOneFranchise(selectedFranchise);
+    getAll(
+      [(currentPage - 1) * itemPerPage, itemPerPage],
+      setCashiersList,
+      setCount
+    );
+    getAllFranchises(
+      [listPage * itemPerList, itemPerList],
+      setFranchisesList,
+      setFranchiseCount
+    );
+  };
   // submit function to add a new item
   const onFormSubmit = (submitData) => {
     const { name, email, password, franchiseId } = submitData;
@@ -163,13 +179,17 @@ const CashierManagment = () => {
       name: name,
       email: email,
       password: password,
-      franchiseId: franchiseId,
+      franchiseId:
+        user.type === "franchise" ? currentFranchise.id : franchiseId,
     };
     create(submittedData)
       .then(() => toast("Cajero creado con éxito", { type: "success" }))
       .catch((error) => {
         console.log(error);
         toast("Algo salió mal!", { type: "error" });
+      })
+      .finally(() => {
+        refetchData();
       });
     resetForm();
     setModal({ edit: false }, { add: false });
@@ -186,7 +206,8 @@ const CashierManagment = () => {
         submittedData = {
           name: name,
           email: email,
-          franchiseId: franchiseId,
+          franchiseId:
+            user.type === "franchise" ? currentFranchise.id : franchiseId,
         };
       }
     });
@@ -197,6 +218,9 @@ const CashierManagment = () => {
       .catch((error) => {
         console.log(error);
         toast("Algo salio mal!", { type: "error" });
+      })
+      .finally(() => {
+        refetchData();
       });
     let index = newitems.findIndex((item) => item.id === editId);
     newitems[index] = {
@@ -219,7 +243,8 @@ const CashierManagment = () => {
         setFormData({
           name: item.name,
           email: item.email,
-          franchiseId: item.franchiseId,
+          franchiseId:
+            user.type === "franchise" ? currentFranchise.id : item.franchiseId,
         });
         setModal({ edit: true }, { add: false });
         setEditedId(id);
@@ -246,17 +271,30 @@ const CashierManagment = () => {
       const arrIds = newData.map((item) => item.id);
       deleteMany(arrIds)
         .then(() => toast("Cajeros eliminadas con éxito", { type: "success" }))
-        .catch((error) => toast("Algo ha salido mal!", { type: "error" }));
+        .catch((error) => toast("Algo ha salido mal!", { type: "error" }))
+        .finally(() => {
+          refetchData();
+        });
       setFranchisesList([...restData]);
       return;
     }
     deleteOne(newData[0].id)
       .then(() => toast("Franquicia eliminada con éxito", { type: "success" }))
-      .catch((error) => toast("Algo ha salido mal!", { type: "error" }));
+      .catch((error) => toast("Algo ha salido mal!", { type: "error" }))
+      .finally(() => {
+        refetchData();
+      });
     setFranchisesList([...restData]);
     return;
   };
-
+  const handleDeleteSingle = async ({ id }) => {
+    deleteOne(id)
+      .then(() => toast("Cajero eliminado con éxito", { type: "success" }))
+      .catch((error) => toast("Algo ha salido mal!", { type: "error" }))
+      .finally(() => {
+        refetchData();
+      });
+  };
   // function to change the complete property of an item
   // Get current list, pagination
   const indexOfLastItem = currentPage * itemPerPage;
@@ -294,6 +332,7 @@ const CashierManagment = () => {
   const onChangeFranchise = (e) => {
     console.log(e.value);
     const franchiseId = user.type === "admin" ? e.value : currentFranchise.id;
+    setSelectedFranchise(franchiseId);
     getAllCashiersFromOneFranchise(franchiseId);
   };
   const getAllCashiersFromOneFranchise = async (id) => {
@@ -328,7 +367,7 @@ const CashierManagment = () => {
                 Cajeros
               </BlockTitle>
               <BlockDes className="text-soft">
-                <p>{`Actualmente hay ${cashiersList.length} cajeros.`}</p>
+                <p>{`Actualmente hay ${cashiersList?.length} cajeros.`}</p>
               </BlockDes>
             </BlockHeadContent>
             <BlockHeadContent>
@@ -542,6 +581,7 @@ const CashierManagment = () => {
                             text="Editar"
                           />
                         </li>
+
                         {/*item.status !== "Suspend" && (
                           <React.Fragment>
                             <li
@@ -579,6 +619,19 @@ const CashierManagment = () => {
                                   >
                                     <Icon name="edit"></Icon>
                                     <span>Editar</span>
+                                  </DropdownItem>
+                                </li>
+                                <li>
+                                  <DropdownItem
+                                    tag="a"
+                                    href="#"
+                                    onClick={(ev) => {
+                                      ev.preventDefault();
+                                      handleDeleteSingle({ id: item.id });
+                                    }}
+                                  >
+                                    <Icon name="na"></Icon>
+                                    <span>Eliminar</span>
                                   </DropdownItem>
                                 </li>
                                 {/*item.status !== "Suspend" && (
@@ -687,30 +740,32 @@ const CashierManagment = () => {
                       )}
                     </FormGroup>
                   </Col>
-                  <Col md="6" className="mt-2">
-                    <FormGroup>
-                      <label className="form-label">
-                        Seleccionar franquicia
-                      </label>
-                      <div className="form-control-wrap">
-                        <Controller
-                          name="franchiseId"
-                          control={control}
-                          render={({ onChange, ref, value }) => (
-                            <RSelect
-                              inputRef={ref}
-                              options={franchiseList.map((item) => ({
-                                label: item.name,
-                                value: item.id,
-                              }))}
-                              placeholder="Selecciona franquicia"
-                              onChange={(e) => onChange(e.value)}
-                            />
-                          )}
-                        />
-                      </div>
-                    </FormGroup>
-                  </Col>
+                  {user.type !== "franchise" && (
+                    <Col md="6" className="mt-2">
+                      <FormGroup>
+                        <label className="form-label">
+                          Seleccionar franquicia
+                        </label>
+                        <div className="form-control-wrap">
+                          <Controller
+                            name="franchiseId"
+                            control={control}
+                            render={({ onChange, ref, value }) => (
+                              <RSelect
+                                inputRef={ref}
+                                options={franchiseList.map((item) => ({
+                                  label: item.name,
+                                  value: item.id,
+                                }))}
+                                placeholder="Selecciona franquicia"
+                                onChange={(e) => onChange(e.value)}
+                              />
+                            )}
+                          />
+                        </div>
+                      </FormGroup>
+                    </Col>
+                  )}
                   <Col md="6" className="mt-2">
                     <FormGroup>
                       <label className="form-label">Contraseña</label>
@@ -820,35 +875,37 @@ const CashierManagment = () => {
                       )}
                     </FormGroup>
                   </Col>
-                  <Col md="12" className="mt-2 mb-2">
-                    <FormGroup>
-                      <label className="form-label">
-                        Selecciona Franquicia
-                      </label>
-                      <div className="form-control-wrap">
-                        <Controller
-                          name="franchiseId"
-                          control={control}
-                          render={({ onChange, ref, value }) => (
-                            <RSelect
-                              value={value}
-                              inputRef={ref}
-                              options={franchiseList.map((item) => ({
-                                label: item.name,
-                                value: item.id,
-                              }))}
-                              placeholder="Selecciona franquicia"
-                              onChange={(e) => {
-                                onChange(e.value);
-                                console.log(e);
-                              }}
-                            />
-                          )}
-                        />
-                      </div>
-                    </FormGroup>
-                  </Col>
-                  <Col size="12">
+                  {user.type !== "franchise" && (
+                    <Col md="12" className="mt-2 mb-2">
+                      <FormGroup>
+                        <label className="form-label">
+                          Selecciona Franquicia
+                        </label>
+                        <div className="form-control-wrap">
+                          <Controller
+                            name="franchiseId"
+                            control={control}
+                            render={({ onChange, ref, value }) => (
+                              <RSelect
+                                value={value}
+                                inputRef={ref}
+                                options={franchiseList.map((item) => ({
+                                  label: item.name,
+                                  value: item.id,
+                                }))}
+                                placeholder="Selecciona franquicia"
+                                onChange={(e) => {
+                                  onChange(e.value);
+                                  console.log(e);
+                                }}
+                              />
+                            )}
+                          />
+                        </div>
+                      </FormGroup>
+                    </Col>
+                  )}
+                  <Col size="12" className="mt-2">
                     <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
                       <li className="mr-4">
                         <Button color="primary" size="md" type="submit">
