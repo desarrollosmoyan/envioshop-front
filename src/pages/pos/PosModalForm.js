@@ -49,6 +49,7 @@ export default function PosModalForm() {
   const makeAllRequest = async () => {
     const { user } = await getMe();
     setUserId(user.id);
+    if (user.type === "admin") return setOpen(false);
     if (user.Turn) {
       setOpen(false);
     } else {
@@ -66,7 +67,9 @@ export default function PosModalForm() {
         bill30: 0,
       },
     });
-  const onHandleSubmit = (formData) => {
+  const onHandleSubmit = async (formData) => {
+    const me = await getMe();
+    if (me?.user.type === "admin") return setOpen(false);
     const openBalance = {
       coins: {
         coin10: formData.coin10,
@@ -88,7 +91,10 @@ export default function PosModalForm() {
         toast("Algo ha salido mal. Vuelve ha intentarlo más tarde", {
           type: "error",
         })
-      );
+      )
+      .finally(() => {
+        window.location.reload();
+      });
   };
 
   useEffect(() => {

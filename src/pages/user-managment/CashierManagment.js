@@ -186,12 +186,14 @@ const CashierManagment = () => {
   // submit function to add a new item
   const onFormSubmit = (submitData) => {
     const { name, email, password, franchiseId } = submitData;
+    console.log({ franchiseId });
+    //const { franchiseId } = formData;
     let submittedData = {
       name: name,
       email: email,
       password: password,
       franchiseId:
-        user.type === "franchise" ? currentFranchise.id : franchiseId,
+        user.type === "franchise" ? currentFranchise.id : franchiseId.value,
     };
     create(submittedData)
       .then(() => toast("Cajero creado con éxito", { type: "success" }))
@@ -729,9 +731,10 @@ const CashierManagment = () => {
                                   }
                                   className="react-select-container"
                                   classNamePrefix="react-select"
+                                  onChange={onChange}
                                   defaultOptions={franchiseList.map((f) => ({
                                     label: f.name,
-                                    value: f.name,
+                                    value: f.id,
                                   }))}
                                   loadOptions={(inputValue) =>
                                     filterFranchisesByName(inputValue)

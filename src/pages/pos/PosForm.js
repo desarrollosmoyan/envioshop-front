@@ -12,11 +12,22 @@ import { toast, ToastContainer } from "react-toastify";
 import Input from "../../components/input/input/Input";
 import { useSelector } from "react-redux";
 import { useCookie } from "react-use";
+import useUser from "../../hooks/useUser";
+import { getMe } from "./Pos";
+import { useEffect } from "react";
 export default function PosForm() {
   const [isLoading, setLoading] = useState(true);
   const [token] = useCookie("token");
   const dispatch = useDispatch();
+
   const { handleSubmit, register, errors } = useForm();
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    (async () => {
+      const { user } = await getMe({ token });
+      if (user.type !== "admin") return setUser(user);
+    })();
+  }, []);
   const onFormSubmit = async (formData) => {
     try {
       const postData = {
@@ -179,7 +190,12 @@ export default function PosForm() {
             />
           </Row>
           <div className="mt-2">
-            <Button color="primary">
+            <Button
+              color="primary"
+              disabled={!user}
+              type={!user ? "button" : "submit"}
+              style={{ cursor: !user ? "not-allowed" : "pointer" }}
+            >
               Cotizar Envio <em className="icon ni ni-caret-right-fill"></em>
             </Button>
           </div>

@@ -147,8 +147,7 @@ const FranchiseManagment = () => {
       return item;
     });
     setFranchisesList([...newData]);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
+  }, []);
   // function to change the selected property of an item
   const onSelectChange = (e, id) => {
     let newData = franchisesList;
@@ -268,6 +267,15 @@ const FranchiseManagment = () => {
     setFranchisesList([...restData]);
     return;
   };
+  const deleteSingleFranchise = async (id) => {
+    let restData = franchisesList.filter((item) => item.id !== id);
+
+    deleteMany([id])
+      .then(() => toast("Franquicia eliminada con éxito", { type: "success" }))
+      .catch((error) => toast("Algo ha salido mal!", { type: "error" }));
+    setFranchisesList([...restData]);
+    return;
+  };
 
   // function to change the complete property of an item
   const selectorSuspendUser = () => {
@@ -288,6 +296,8 @@ const FranchiseManagment = () => {
     );
   }, [searchValue, currentPage, itemPerPage]);
   // Get current list, pagination
+
+  //const indexOfFirstItem = indexOfLastItem - itemPerPage;
   const currentItems = franchisesList;
   const exportCSV = () => {
     const fileName = `Lista de Franquicias-${new Date(
@@ -586,6 +596,36 @@ const FranchiseManagment = () => {
                                     <span>Edit</span>
                                   </DropdownItem>
                                 </li>
+                                <li>
+                                  <DropdownItem
+                                    tag="a"
+                                    href="#"
+                                    onClick={(ev) => {
+                                      ev.preventDefault();
+                                      deleteSingleFranchise(item.id);
+                                    }}
+                                  >
+                                    <Icon name="na"></Icon>
+                                    <span>Eliminar</span>
+                                  </DropdownItem>
+                                </li>
+                                {/*item.status !== "Suspend" && (
+                                  <React.Fragment>
+                                    <li className="divider"></li>
+                                    <li onClick={() => suspendUser(item.id)}>
+                                      <DropdownItem
+                                        tag="a"
+                                        href="#suspend"
+                                        onClick={(ev) => {
+                                          ev.preventDefault();
+                                        }}
+                                      >
+                                        <Icon name="na"></Icon>
+                                        <span>Suspend User</span>
+                                      </DropdownItem>
+                                    </li>
+                                  </React.Fragment>
+                                      )*/}
                               </ul>
                             </DropdownMenu>
                           </UncontrolledDropdown>

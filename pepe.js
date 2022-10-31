@@ -1,5 +1,5 @@
 const pepe = {
-  message: "Rating maked successfully",
+  message: "Rating made successfully",
   data: [
     {
       serviceName: "ECONOMY SELECT DOMESTIC",

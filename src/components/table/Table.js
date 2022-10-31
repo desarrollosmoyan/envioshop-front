@@ -78,13 +78,13 @@ const Table = ({
                 <td className="align-middle">{item.serviceName}</td>
                 <td className="align-middle">
                   {item.company === "FEDEX"
-                    ? parseFloat(item.prices["0"].subTotal)
-                    : parseFloat(item.prices.subTotal)}
+                    ? parseFloat(item?.prices?.subTotal)
+                    : parseFloat(item?.prices?.subTotal)}
                 </td>
                 <td className="align-middle">
                   {item.company === "FEDEX"
-                    ? parseFloat(item.prices["0"].total)
-                    : parseFloat(item.prices.total)}
+                    ? parseFloat(item?.prices?.total)
+                    : parseFloat(item?.prices?.total)}
                 </td>
                 <td className="align-middle">
                   <Button

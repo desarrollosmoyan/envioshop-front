@@ -14,11 +14,13 @@ import Content from "../../layout/content/Content";
 import { Button, Col, Row } from "reactstrap";
 import CheckoutPage3 from "./checkout/CheckoutPage3";
 import CoinModal from "../../components/coin-modal/CoinModal";
-import { Redirect } from "react-router";
+import { Redirect, useHistory } from "react-router";
 
 export default function Checkout() {
   const service = useSelector((state) => state.rating.selected);
   const pdf = useSelector((state) => state.pdf.data);
+  const msgPDF = useSelector((state) => state.pdf.message);
+  const history = useHistory();
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(1);
   if (!service)
@@ -30,10 +32,17 @@ export default function Checkout() {
         <CoinModal open={open} setOpen={setOpen} />
         <BlockHead size="sm" className="mb-0">
           <BlockBetween>
-            <BlockHeadContent>
+            <BlockHeadContent className="d-flex justify-content-between w-100">
               <BlockTitle page tag="h3">
                 Checkout
               </BlockTitle>
+              <Button
+                color="warning"
+                onClick={() => history.push("/shipments/pos")}
+                className="text-uppercase d-flex align-items-center"
+              >
+                <em className="icon ni ni-caret-left-fill"></em> Volver
+              </Button>
             </BlockHeadContent>
           </BlockBetween>
         </BlockHead>
@@ -75,39 +84,43 @@ export default function Checkout() {
           </div>
           <div className="ml-2 w-50 h-100 d-flex justify-content-between flex-column border">
             {pdf ? (
-              <>
-                <iframe
-                  title="pepe"
-                  className="w-100"
-                  style={{ height: "500px" }}
-                  src={
-                    !pdf.includes("blob")
-                      ? `data:application/pdf;base64,${pdf}`
-                      : pdf
-                  }
-                ></iframe>
-                <Row className="mt-3">
-                  <Col>
-                    <a
-                      href={`data:application/pdf;base64,${pdf}`}
-                      download={"Documento"}
-                    >
-                      <Button color="info">Imprimir</Button>
-                    </a>
-                  </Col>
-                  <Col className="d-flex justify-content-end">
-                    <Button
-                      onClick={() => {
-                        setOpen(true);
-                      }}
-                      color="success"
-                      className="align-self-end"
-                    >
-                      Finalizar
-                    </Button>
-                  </Col>
-                </Row>
-              </>
+              pdf === "Se debe crear manualmente." ? (
+                <h5>Se debe crear manualmente.</h5>
+              ) : (
+                <>
+                  <iframe
+                    title="pepe"
+                    className="w-100"
+                    style={{ height: "500px" }}
+                    src={
+                      !pdf.includes("blob")
+                        ? `data:application/pdf;base64,${pdf}`
+                        : pdf
+                    }
+                  ></iframe>
+                  <Row className="mt-3">
+                    <Col>
+                      <a
+                        href={`data:application/pdf;base64,${pdf}`}
+                        download={"Documento"}
+                      >
+                        <Button color="info">Imprimir</Button>
+                      </a>
+                    </Col>
+                    <Col className="d-flex justify-content-end">
+                      <Button
+                        onClick={() => {
+                          setOpen(true);
+                        }}
+                        color="success"
+                        className="align-self-end"
+                      >
+                        Finalizar
+                      </Button>
+                    </Col>
+                  </Row>
+                </>
+              )
             ) : (
               <h5>Acá se mostrará el PDF</h5>
             )}
