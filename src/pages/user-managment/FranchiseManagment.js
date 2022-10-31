@@ -268,6 +268,15 @@ const FranchiseManagment = () => {
     setFranchisesList([...restData]);
     return;
   };
+  const deleteSingleFranchise = async (id) => {
+    let restData = franchisesList.filter((item) => item.id !== id);
+
+    deleteMany([id])
+      .then(() => toast("Franquicia eliminada con éxito", { type: "success" }))
+      .catch((error) => toast("Algo ha salido mal!", { type: "error" }));
+    setFranchisesList([...restData]);
+    return;
+  };
 
   // function to change the complete property of an item
   const selectorSuspendUser = () => {
@@ -604,6 +613,19 @@ const FranchiseManagment = () => {
                                   >
                                     <Icon name="edit"></Icon>
                                     <span>Edit</span>
+                                  </DropdownItem>
+                                </li>
+                                <li>
+                                  <DropdownItem
+                                    tag="a"
+                                    href="#"
+                                    onClick={(ev) => {
+                                      ev.preventDefault();
+                                      deleteSingleFranchise(item.id);
+                                    }}
+                                  >
+                                    <Icon name="na"></Icon>
+                                    <span>Eliminar</span>
                                   </DropdownItem>
                                 </li>
                                 {/*item.status !== "Suspend" && (
