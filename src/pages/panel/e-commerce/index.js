@@ -1,16 +1,24 @@
-import React from "react";
-import Content from "../../../layout/content/Content";
-import Head from "../../../layout/head/Head";
-import { Block, BlockBetween, BlockHead, BlockHeadContent, BlockTitle, Col, Row } from "../../../components/Component";
-import RecentOrders from "../../../components/partials/default/recent-orders/RecentOrders";
-import TopProducts from "../../../components/partials/default/top-products/TopProducts";
-import AverageOrder from "../../../components/partials/e-commerce/average-order/AverageOrder";
-import Customer from "../../../components/partials/e-commerce/customers/Customer";
-import Orders from "../../../components/partials/e-commerce/orders/Orders";
-import TotalSales from "../../../components/partials/e-commerce/total-sales/TotalSales";
-import StoreStatistics from "../../../components/partials/default/StoreStatistics";
-import TrafficSources from "../../../components/partials/e-commerce/traffic-sources/TrafficSources";
-import StoreVisitors from "../../../components/partials/e-commerce/store-visitors/StoreVisitors";
+import React from 'react';
+import Content from '../../../layout/content/Content';
+import Head from '../../../layout/head/Head';
+import {
+  Block,
+  BlockBetween,
+  BlockHead,
+  BlockHeadContent,
+  BlockTitle,
+  Col,
+  Row,
+} from '../../../components/Component';
+import RecentOrders from '../../../components/partials/default/recent-orders/RecentOrders';
+import TopProducts from '../../../components/partials/default/top-products/TopProducts';
+import AverageOrder from '../../../components/partials/e-commerce/average-order/AverageOrder';
+import Customer from '../../../components/partials/e-commerce/customers/Customer';
+import Orders from '../../../components/partials/e-commerce/orders/Orders';
+import TotalSales from '../../../components/partials/e-commerce/total-sales/TotalSales';
+import StoreStatistics from '../../../components/partials/default/StoreStatistics';
+import TrafficSources from '../../../components/partials/e-commerce/traffic-sources/TrafficSources';
+import StoreVisitors from '../../../components/partials/e-commerce/store-visitors/StoreVisitors';
 
 const Dashboard = () => {
   return (
@@ -43,12 +51,12 @@ const Dashboard = () => {
                 </Col>
               </Row>
             </Col>
-            <Col xxl="8">
+            <Col xxl="12">
               <RecentOrders />
             </Col>
-            <Col xxl="4" md="6">
+            {/*  <Col xxl="4" md="6">
               <TopProducts />
-            </Col>
+            </Col> */}
             <Col xxl="3" md="6">
               <StoreStatistics />
             </Col>

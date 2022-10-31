@@ -1,19 +1,19 @@
-import React, { useState } from "react";
-import Head from "../layout/head/Head";
-import Content from "../layout/content/Content";
-import SalesStatistics from "../components/partials/default/SalesStatistics";
-import OrderStatistics from "../components/partials/default/OrderStatistics";
-import StoreStatistics from "../components/partials/default/StoreStatistics";
-import RecentOrders from "../components/partials/default/recent-orders/RecentOrders";
-import TopProducts from "../components/partials/default/top-products/TopProducts";
-import DataCard from "../components/partials/default/DataCard";
-import EnvioshopLogo from "../images/logo.webp";
+import React, { useState } from 'react';
+import Head from '../layout/head/Head';
+import Content from '../layout/content/Content';
+import SalesStatistics from '../components/partials/default/SalesStatistics';
+import OrderStatistics from '../components/partials/default/OrderStatistics';
+import StoreStatistics from '../components/partials/default/StoreStatistics';
+import RecentOrders from '../components/partials/default/recent-orders/RecentOrders';
+import TopProducts from '../components/partials/default/top-products/TopProducts';
+import DataCard from '../components/partials/default/DataCard';
+import EnvioshopLogo from '../images/logo.webp';
 import {
   DropdownToggle,
   DropdownMenu,
   UncontrolledDropdown,
   DropdownItem,
-} from "reactstrap";
+} from 'reactstrap';
 import {
   Block,
   BlockHead,
@@ -24,20 +24,20 @@ import {
   Row,
   Col,
   BlockBetween,
-} from "../components/Component";
+} from '../components/Component';
 import {
   DefaultCustomerChart,
   DefaultOrderChart,
   DefaultRevenueChart,
-} from "../components/partials/charts/default/DefaultCharts";
-import { useEffect } from "react";
-import { toast } from "react-toastify";
-import axios from "axios";
-import { useCookie } from "react-use";
-import { useSelector } from "react-redux";
+} from '../components/partials/charts/default/DefaultCharts';
+import { useEffect } from 'react';
+import { toast } from 'react-toastify';
+import axios from 'axios';
+import { useCookie } from 'react-use';
+import { useSelector } from 'react-redux';
 const Homepage = () => {
   const [sm, updateSm] = useState(false);
-  const [token] = useCookie("token");
+  const [token] = useCookie('token');
   const [stats, setStats] = useState();
   const user = useSelector((state) => state.user);
   useEffect(() => {
@@ -54,7 +54,7 @@ const Homepage = () => {
       console.log(data);
       setStats(data);
     } catch (error) {
-      toast("Algo salió mal!", { type: "error" });
+      toast('Algo salió mal!', { type: 'error' });
       setStats(null);
     }
   };
@@ -66,16 +66,16 @@ const Homepage = () => {
           <BlockBetween>
             <BlockHeadContent>
               <BlockTitle page tag="h3">
-                {user.type === "cashier"
-                  ? "Bienvenido al Sistema de Envioshop"
-                  : "Dashboard"}
+                {user.type === 'cashier'
+                  ? 'Bienvenido al Sistema de Envioshop'
+                  : 'Dashboard'}
               </BlockTitle>
             </BlockHeadContent>
             <BlockHeadContent>
               <div className="toggle-wrap nk-block-tools-toggle">
                 <Button
                   className={`btn-icon btn-trigger toggle-expand mr-n1 ${
-                    sm ? "active" : ""
+                    sm ? 'active' : ''
                   }`}
                   onClick={() => updateSm(!sm)}
                 >
@@ -83,13 +83,13 @@ const Homepage = () => {
                 </Button>
                 <div
                   className="toggle-expand-content"
-                  style={{ display: sm ? "block" : "none" }}
+                  style={{ display: sm ? 'block' : 'none' }}
                 ></div>
               </div>
             </BlockHeadContent>
           </BlockBetween>
         </BlockHead>
-        {user.type === "cashier" ? (
+        {user.type === 'cashier' ? (
           <div className=" d-flex align-items-center justify-content-center mt-5">
             <img src={EnvioshopLogo} alt="logo" />
           </div>
@@ -117,7 +117,7 @@ const Homepage = () => {
               <Col xxl="3" sm="6">
                 <DataCard
                   title="Franquicias registradas"
-                  percentChange={"4.63"}
+                  percentChange={'4.63'}
                   up={true}
                   chart={<DefaultCustomerChart />}
                   amount={stats ? stats.totalFranchises : 0}
@@ -126,7 +126,7 @@ const Homepage = () => {
               <Col xxl="3" sm="6">
                 <DataCard
                   title="Cajeros registrados"
-                  percentChange={"4.63"}
+                  percentChange={'4.63'}
                   up={true}
                   chart={<DefaultCustomerChart />}
                   amount={stats ? stats.totalCashiers : 0}
@@ -141,16 +141,16 @@ const Homepage = () => {
             <Col xxl="3" md="6">
               <StoreStatistics />
                 </Col>*/}
-              <Col xxl="8">
+              <Col xxl="12">
                 <RecentOrders data={stats ? stats.recentShipments : []} />
               </Col>
-              <Col xxl="4" md="8" lg="6">
+              {/* <Col xxl="4" md="8" lg="6">
                 {stats && stats.topFranchises ? (
                   <TopProducts
                     topFranchises={stats ? stats.topFranchises : []}
                   />
                 ) : null}
-              </Col>
+              </Col> */}
             </Row>
           </Block>
         )}
