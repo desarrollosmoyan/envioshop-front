@@ -10,6 +10,7 @@ import {
   Form,
   Row,
 } from "reactstrap";
+import { AsyncSelect } from "react-select/async";
 import {
   Block,
   BlockBetween,
@@ -147,20 +148,6 @@ const FranchiseManagment = () => {
     });
     setFranchisesList([...newData]);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  // Changing state value when searching name
-  /* useEffect(() => {
-    if (onSearchText !== "") {
-      const filteredObject = userData.filter((item) => {
-        return (
-          item.name.toLowerCase().includes(onSearchText.toLowerCase()) ||
-          item.email.toLowerCase().includes(onSearchText.toLowerCase())
-        );
-      });
-      setFranchisesList([...filteredObject]);
-    } else {
-      setFranchisesList([]);
-    }
-  }, [onSearchText, setFranchisesList]);*/
 
   // function to change the selected property of an item
   const onSelectChange = (e, id) => {
@@ -210,7 +197,6 @@ const FranchiseManagment = () => {
     const { name, email, cellphone } = submitData;
     let submittedData;
     let newitems = franchisesList;
-    console.log(editId);
     newitems.forEach((item, i) => {
       if (item.id === editId) {
         submittedData = {
@@ -221,7 +207,6 @@ const FranchiseManagment = () => {
         };
       }
     });
-    console.log(submittedData);
     updateOne(editId, submittedData);
     let index = newitems.findIndex((item) => item.id === editId);
     newitems[index] = submittedData;
@@ -303,8 +288,6 @@ const FranchiseManagment = () => {
     );
   }, [searchValue, currentPage, itemPerPage]);
   // Get current list, pagination
-  //const indexOfLastItem = currentPage * itemPerPage;
-  //const indexOfFirstItem = indexOfLastItem - itemPerPage;
   const currentItems = franchisesList;
   const exportCSV = () => {
     const fileName = `Lista de Franquicias-${new Date(
@@ -319,22 +302,11 @@ const FranchiseManagment = () => {
     const exportType = exportFromJSON.types.csv;
     exportFromJSON({ data, fileName, exportType });
   };
-  /*useEffect(() => {
-    if (cityName === "") return;
-    getAll(
-      [(cityPage - 1) * itemPerList, itemPerList],
-      setFranchisesList,
-      setCount,
-      cityName
-    ).catch((error) => console.log(error));
-  }, [cityName]);*/
-  //console.log(franchisesList);
   // Change Page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const filterFranchisesByCityName = (e) => {
     const value = e.value;
-    console.log(value);
     setCityName(value);
   };
 
@@ -350,6 +322,11 @@ const FranchiseManagment = () => {
       [(currentPage - 1) * itemPerPage, itemPerPage],
       setFranchisesList
     );*/
+  };
+  const clearFilters = () => {
+    setCurrentPage(0);
+    setItemPerList(10);
+    setItemPerPage(5);
   };
   const { errors, register, handleSubmit } = useForm();
   return (
@@ -440,15 +417,22 @@ const FranchiseManagment = () => {
                 />
               </FormGroup>
             </div>
-            <div className="w-15 ">
-              <RSelect
-                placeholder="Mostrar de:"
-                options={[5, 10, 20].map((e) => ({ label: e, value: e }))}
-                onChange={(e) => {
-                  setItemPerPage(e.value);
-                  setCurrentPage(1);
-                }}
-              />
+            <div className="w-50 d-flex  justify-content-end">
+              <FormGroup>
+                <Button color="primary" onClick={clearFilters} className="mr-2">
+                  Limpiar Filtros
+                </Button>
+              </FormGroup>
+              <FormGroup className="w-25">
+                <RSelect
+                  placeholder="Mostrar de:"
+                  options={[5, 10, 20].map((e) => ({ label: e, value: e }))}
+                  onChange={(e) => {
+                    setItemPerPage(e.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </FormGroup>
             </div>
           </Row>
           <div className="nk-tb-list is-separate is-medium mb-3">
@@ -502,19 +486,6 @@ const FranchiseManagment = () => {
                           <span>Eliminar</span>
                         </DropdownItem>
                       </li>
-                      {/*<li>
-                        <DropdownItem
-                          tag="a"
-                          href="#"
-                          onClick={(ev) => {
-                            ev.preventDefault();
-                            selectorSuspendUser();
-                          }}
-                        >
-                          <Icon name="trash"></Icon>
-                          <span>Suspend Selected</span>
-                        </DropdownItem>
-                      </li>*/}
                     </ul>
                   </DropdownMenu>
                 </UncontrolledDropdown>
@@ -592,23 +563,7 @@ const FranchiseManagment = () => {
                             text="Editar"
                           />
                         </li>
-                        {/*item.status !== "Suspend" && (
-                          <React.Fragment>
-                            <li
-                              className="nk-tb-action-hidden"
-                              onClick={() => suspendUser(item.id)}
-                            >
-                              <TooltipComponent
-                                tag="a"
-                                containerClassName="btn btn-trigger btn-icon"
-                                id={"suspend" + item.id}
-                                icon="user-cross-fill"
-                                direction="top"
-                                text="Suspend"
-                              />
-                            </li>
-                          </React.Fragment>
-                        )*/}
+
                         <li>
                           <UncontrolledDropdown>
                             <DropdownToggle
@@ -631,23 +586,6 @@ const FranchiseManagment = () => {
                                     <span>Edit</span>
                                   </DropdownItem>
                                 </li>
-                                {/*item.status !== "Suspend" && (
-                                  <React.Fragment>
-                                    <li className="divider"></li>
-                                    <li onClick={() => suspendUser(item.id)}>
-                                      <DropdownItem
-                                        tag="a"
-                                        href="#suspend"
-                                        onClick={(ev) => {
-                                          ev.preventDefault();
-                                        }}
-                                      >
-                                        <Icon name="na"></Icon>
-                                        <span>Suspend User</span>
-                                      </DropdownItem>
-                                    </li>
-                                  </React.Fragment>
-                                      )*/}
                               </ul>
                             </DropdownMenu>
                           </UncontrolledDropdown>
@@ -668,7 +606,7 @@ const FranchiseManagment = () => {
               />
             ) : (
               <div className="text-center">
-                <span className="text-silent">No data found</span>
+                <span className="text-silent">No hay franquicias</span>
               </div>
             )}
           </PreviewAltCard>

@@ -61,8 +61,6 @@ const CashierManagment = () => {
   const [franchiseCount, setFranchiseCount] = useState(0);
   const [searchFranchiseText, setSearchFranchiseText] = useState(0);
   const user = useSelector((state) => state.user);
-  console.log(user);
-  console.log({ currentFranchise });
   useEffect(() => {
     if (user.type === "admin") {
       getAll(
@@ -188,7 +186,6 @@ const CashierManagment = () => {
   // submit function to add a new item
   const onFormSubmit = (submitData) => {
     const { name, email, password, franchiseId } = submitData;
-    //const { franchiseId } = formData;
     let submittedData = {
       name: name,
       email: email,
@@ -307,21 +304,9 @@ const CashierManagment = () => {
         refetchData();
       });
   };
-  // function to change the complete property of an item
-  // Get current list, pagination
-  const indexOfLastItem = currentPage * itemPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemPerPage;
   const currentItems = cashiersList;
   // Change Page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-  const handleCashierNameFilterChange = (e) => {
-    const value = e.value;
-    const arr = cashiersList.filter((cashier) =>
-      cashier.franchise.name === value ? true : false
-    );
-    setCashiersList(arr);
-  };
-
   const exportCSV = () => {
     const fileName = `Lista de Cajeros-${new Date(
       Date.now()
@@ -359,6 +344,10 @@ const CashierManagment = () => {
     } catch (error) {
       toast("Algo salió mal!", { type: "error" });
     }
+  };
+
+  const onLoadMoreClick = () => {
+    setItemPerList(itemPerList + 10);
   };
   const { errors, register, handleSubmit, control } = useForm();
   return (
@@ -420,32 +409,50 @@ const CashierManagment = () => {
         <Block>
           <ToastContainer />
           <Row className="justify-content-between">
-            <div className="w-15">
+            <div className="w-50">
               {user.type === "admin" ? (
-                <div className="form-control-select">
-                  <AsyncSelect
-                    maxMenuHeight={160}
-                    loadingMessage={() => "Cargando Franquicias..."}
-                    placeholder="Filtrar por nombre de franquicia"
-                    className="react-select-container"
-                    classNamePrefix="react-select"
-                    onChange={onChangeFranchise}
-                    defaultOptions={franchiseList.map((f) => ({
-                      label: f.name,
-                      value: f.id,
-                    }))}
-                    loadOptions={(inputValue) =>
-                      filterFranchisesByName(inputValue)
-                    }
-                    components={{
-                      MenuList: (menuListProps) => (
-                        <SelectMenuButton {...menuListProps} />
-                      ),
-                    }}
-                    noOptionsMessage={() => "No hay opciones"}
+                <div className="d-flex flex-row w-100">
+                  <div className="form-control-select w-50">
+                    <AsyncSelect
+                      maxMenuHeight={160}
+                      loadingMessage={() => "Cargando Franquicias..."}
+                      placeholder="Filtrar por nombre de franquicia"
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                      onChange={onChangeFranchise}
+                      defaultOptions={franchiseList.map((f) => ({
+                        label: f.name,
+                        value: f.id,
+                      }))}
+                      loadOptions={(inputValue) =>
+                        filterFranchisesByName(inputValue)
+                      }
+                      components={{
+                        MenuList: (menuListProps) => (
+                          <SelectMenuButton
+                            {...menuListProps}
+                            onClick={onLoadMoreClick}
+                          />
+                        ),
+                      }}
+                      noOptionsMessage={() => "No hay opciones"}
+                    />
+                  </div>
+                  <div className="">
+                    <Button color="primary" type="button">
+                      Limpiar Filtros
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="w-25">
+                  <input
+                    placeholder="Nombre del cajero..."
+                    type="search"
+                    className="form-control form-control-md"
                   />
                 </div>
-              ) : null}
+              )}
             </div>
             <div className="w-15 align-self-end">
               <RSelect
@@ -505,19 +512,6 @@ const CashierManagment = () => {
                           <span>Eliminar seleccionado</span>
                         </DropdownItem>
                       </li>
-                      {/*<li>
-                        <DropdownItem
-                          tag="a"
-                          href="#"
-                          onClick={(ev) => {
-                            ev.preventDefault();
-                            selectorSuspendUser();
-                          }}
-                        >
-                          <Icon name="trash"></Icon>
-                          <span>Suspend Selected</span>
-                        </DropdownItem>
-                        </li>*/}
                     </ul>
                   </DropdownMenu>
                 </UncontrolledDropdown>
@@ -593,24 +587,6 @@ const CashierManagment = () => {
                             text="Editar"
                           />
                         </li>
-
-                        {/*item.status !== "Suspend" && (
-                          <React.Fragment>
-                            <li
-                              className="nk-tb-action-hidden"
-                              onClick={() => suspendUser(item.id)}
-                            >
-                              <TooltipComponent
-                                tag="a"
-                                containerClassName="btn btn-trigger btn-icon"
-                                id={"suspend" + item.id}
-                                icon="user-cross-fill"
-                                direction="top"
-                                text="Suspend"
-                              />
-                            </li>
-                          </React.Fragment>
-                        )*/}
                         <li>
                           <UncontrolledDropdown>
                             <DropdownToggle
@@ -646,23 +622,6 @@ const CashierManagment = () => {
                                     <span>Eliminar</span>
                                   </DropdownItem>
                                 </li>
-                                {/*item.status !== "Suspend" && (
-                                  <React.Fragment>
-                                    <li className="divider"></li>
-                                    <li onClick={() => suspendUser(item.id)}>
-                                      <DropdownItem
-                                        tag="a"
-                                        href="#suspend"
-                                        onClick={(ev) => {
-                                          ev.preventDefault();
-                                        }}
-                                      >
-                                        <Icon name="na"></Icon>
-                                        <span>Suspend User</span>
-                                      </DropdownItem>
-                                    </li>
-                                  </React.Fragment>
-                                      )*/}
                               </ul>
                             </DropdownMenu>
                           </UncontrolledDropdown>
@@ -683,7 +642,7 @@ const CashierManagment = () => {
               />
             ) : (
               <div className="text-center">
-                <span className="text-silent">No data found</span>
+                <span className="text-silent">No hay cajeros</span>
               </div>
             )}
           </PreviewAltCard>
@@ -958,14 +917,14 @@ const CashierManagment = () => {
   );
 };
 
-const SelectMenuButton = ({ onLoadMoreFranchises, ...props }) => {
+const SelectMenuButton = ({ onClick, ...props }) => {
   return (
     <components.MenuList {...props}>
       {props.children}
       <div className="w-100 d-flex aling-items-center justify-content-center">
         <Button
           type="button"
-          onClick={onLoadMoreFranchises}
+          onClick={onClick}
           className=""
           color="primary"
           size="xs"

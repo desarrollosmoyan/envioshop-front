@@ -25,6 +25,9 @@ export default function PosModalForm() {
   const [userId, setUserId] = useState();
   const [token] = useCookie("token");
   const [open, setOpen] = useState(true);
+  const [coins, setCoins] = useState({ coin10: 0, coin20: 0, coin30: 0 });
+  const [bills, setBills] = useState({ bill10: 0, bill20: 0, bill30: 0 });
+  const [total, setTotal] = useState(0);
   useEffect(() => {
     makeAllRequest();
   }, []);
@@ -52,7 +55,6 @@ export default function PosModalForm() {
       setOpen(true);
     }
   };
-  const [total, setTotal] = useState(0);
   const { register, errors, handleSubmit, formState, watch, getValues } =
     useForm({
       defaultValues: {
@@ -88,14 +90,48 @@ export default function PosModalForm() {
         })
       );
   };
-  const calculateTotal = (e) => {
-    const values = getValues();
-    const filteredValues = Object.values(values).filter((item) => !isNaN(item));
-    const sum = Object.values(filteredValues).reduce(
+
+  useEffect(() => {
+    calculateTotal();
+  }, [total]);
+  console.log(total);
+  const calculateTotal = () => {
+    console.log(coins);
+    const coinSum = Object.values(coins).reduce(
       (prev, current) => prev + current,
       0
     );
-    setTotal(sum);
+    const billSum = Object.values(bills).reduce(
+      (prev, current) => prev + current,
+      0
+    );
+    if (isNaN(coinSum)) return;
+    setTotal((coinSum + billSum).toFixed(2));
+  };
+
+  const sumCoins = (e) => {
+    const name = e.target.name;
+    const values = name.length > 0 ? getValues()[name] : null;
+    if (!values || isNaN(values)) {
+      setCoins({ ...coins, [name]: 0 });
+      return;
+    }
+    console.log(values);
+    const coeficient = parseInt(name.replace("coin", "")) / 10;
+    const res = (values * coeficient) / 100;
+    setCoins({ ...coins, [name]: res });
+  };
+
+  const sumBills = (e) => {
+    const name = e.target.name;
+    const values = name.length > 0 ? getValues()[name] : null;
+    if (!values || isNaN(values)) {
+      setBills({ ...bills, [name]: 0 });
+      return;
+    }
+    const coeficient = parseInt(name.replace("bill", "")) / 10;
+    const res = values * coeficient * 10;
+    setBills({ ...bills, [name]: res });
   };
   return (
     <Modal isOpen={open}>
@@ -123,8 +159,8 @@ export default function PosModalForm() {
                   valueAsNumber: true,
                 })}
                 min="0"
-                onChange={calculateTotal}
                 text="10"
+                onChange={sumCoins}
               />
             </Col>
             <Col className="d-flex align-items-center">
@@ -136,8 +172,8 @@ export default function PosModalForm() {
                   required: "Este campo es requerido",
                   valueAsNumber: true,
                 })}
+                onChange={sumBills}
                 min="0"
-                onChange={calculateTotal}
                 text="10"
               />
             </Col>
@@ -148,12 +184,12 @@ export default function PosModalForm() {
                 errors={errors}
                 id="coin20"
                 type="number"
-                onChange={calculateTotal}
                 ref={register({
                   required: "Este campo es requerido",
                   valueAsNumber: true,
                 })}
                 min="0"
+                onChange={sumCoins}
                 text="20"
               />
             </Col>
@@ -164,7 +200,7 @@ export default function PosModalForm() {
                 type="number"
                 min="0"
                 text="20"
-                onChange={calculateTotal}
+                onChange={sumBills}
                 ref={register({
                   required: "Este campo es requerido",
                   valueAsNumber: true,
@@ -180,7 +216,7 @@ export default function PosModalForm() {
                 type="number"
                 min="0"
                 text="30"
-                onChange={calculateTotal}
+                onChange={sumCoins}
                 ref={register({
                   required: "Este campo es requerido",
                   valueAsNumber: true,
@@ -193,7 +229,7 @@ export default function PosModalForm() {
                 id="bill30"
                 type="number"
                 min="0"
-                onChange={calculateTotal}
+                onChange={sumBills}
                 text="30"
                 ref={register({
                   required: "Este campo es requerido",

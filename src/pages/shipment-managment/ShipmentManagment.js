@@ -195,9 +195,9 @@ export default function ShipmentManagment() {
                   }}
                 />
               </FormGroup>
-              <FormGroup className="ml-2 w-25">
-                {user.type === "admin" ||
-                localStorage.getItem("type") === "admin" ? (
+              {user.type === "admin" ||
+              localStorage.getItem("type") === "admin" ? (
+                <FormGroup className="ml-2 w-25">
                   <RSelect
                     placeholder="Franquicia"
                     options={franchisesFilter.map((item) => ({
@@ -216,8 +216,8 @@ export default function ShipmentManagment() {
                       ),
                     }}
                   />
-                ) : null}
-              </FormGroup>
+                </FormGroup>
+              ) : null}
               <FormGroup className="ml-2 w-25">
                 <ReactDatePicker
                   id="lte"
@@ -239,8 +239,8 @@ export default function ShipmentManagment() {
                 />
               </FormGroup>
             </div>
-            <div className="w-50  d-flex">
-              <FormGroup className="w-50">
+            <div className="w-50  d-flex justify-content-end">
+              <FormGroup className="w-25">
                 <RSelect
                   placeholder="Mostrar de:"
                   options={[5, 10, 20].map((e) => ({ label: e, value: e }))}
