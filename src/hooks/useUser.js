@@ -111,11 +111,9 @@ const useUser = (type) => {
         method: "GET",
         url: url,
       });
-      if (!set) return data;
+      if (!set) return data.franchises;
       set(data.franchises);
-      console.log(data);
     } catch (error) {
-      console.log(error);
       throw error;
     }
   };

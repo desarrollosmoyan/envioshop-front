@@ -10,6 +10,7 @@ import {
   Form,
   Row,
 } from "reactstrap";
+import AsyncSelect from "react-select/async";
 import {
   Block,
   BlockBetween,
@@ -46,7 +47,8 @@ const CashierManagment = () => {
   const [token] = useCookie("token");
   const { getAll, create, deleteOne, updateOne, deleteMany } =
     useUser("cashier");
-  const { getAll: getAllFranchises } = useUser("franchise");
+  const { getAll: getAllFranchises, getBySearch: getFranchiseBySearch } =
+    useUser("franchise");
   const [cashiersList, setCashiersList] = useState([]);
   const [franchiseList, setFranchisesList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,6 +58,7 @@ const CashierManagment = () => {
   const [listPage, setListPage] = useState(0);
   const [currentFranchise, setCurrentFranchise] = useState(null);
   const [franchiseCount, setFranchiseCount] = useState(0);
+  const [searchFranchiseText, setSearchFranchiseText] = useState(0);
   const user = useSelector((state) => state.user);
   console.log(user);
   useEffect(() => {
@@ -77,6 +80,14 @@ const CashierManagment = () => {
     }
   }, [itemPerPage, currentPage, user, listPage, itemPerList]);
 
+  useEffect(() => {
+    if (user.type !== "admin") return;
+    getFranchiseBySearch(
+      searchFranchiseText,
+      [listPage * itemPerList, itemPerList],
+      setFranchisesList
+    );
+  }, [searchFranchiseText, listPage, itemPerList, user]);
   const getMe = async () => {
     try {
       const resp = await axios.get(`${process.env.REACT_APP_API_URL}/me`, {
@@ -115,8 +126,12 @@ const CashierManagment = () => {
     });
     setCashiersList([...newData]);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  console.log(cashiersList);
   // Changing state value when searching name
+
+  const filterFranchisesByName = async (inputValue) => {
+    const data = await getFranchiseBySearch(inputValue, [0, 10]);
+    return data.map((f) => ({ label: f.name, value: f.id }));
+  };
   useEffect(() => {
     if (onSearchText !== "") {
       const filteredObject = userData.filter((item) => {
@@ -135,7 +150,6 @@ const CashierManagment = () => {
   const onSelectChange = (e, id) => {
     let newData = cashiersList;
     let index = newData.findIndex((item) => item.id === id);
-    console.log(newData, id);
     newData[index].checked = e.currentTarget.checked;
     setCashiersList([...newData]);
   };
@@ -168,7 +182,6 @@ const CashierManagment = () => {
     create(submittedData)
       .then(() => toast("Cajero creado con éxito", { type: "success" }))
       .catch((error) => {
-        console.log(error);
         toast("Algo salió mal!", { type: "error" });
       });
     resetForm();
@@ -207,7 +220,6 @@ const CashierManagment = () => {
         ...franchiseList.find((f) => f.id === franchiseId),
       },
     };
-    console.log(newitems[index]);
     setModal({ edit: false });
     resetForm();
   };
@@ -287,17 +299,12 @@ const CashierManagment = () => {
     exportFromJSON({ data, fileName, exportType });
   };
 
-  const onLoadMoreFranchises = () => {
-    setItemPerList(itemPerList + 10);
-  };
-
-  const onChangeFranchise = (e) => {
+  const onChangeFranchise = async (e) => {
     console.log(e.value);
     const franchiseId = user.type === "admin" ? e.value : currentFranchise.id;
-    getAllCashiersFromOneFranchise(franchiseId);
+    await getAllCashiersFromOneFranchise(franchiseId);
   };
   const getAllCashiersFromOneFranchise = async (id) => {
-    console.log(token);
     try {
       const { data } = await axios({
         method: "POST",
@@ -312,7 +319,6 @@ const CashierManagment = () => {
       });
       setCashiersList(data.cashiers);
     } catch (error) {
-      console.log(error);
       toast("Algo salió mal!", { type: "error" });
     }
   };
@@ -378,22 +384,29 @@ const CashierManagment = () => {
           <Row className="justify-content-between">
             <div className="w-15">
               {user.type === "admin" ? (
-                <RSelect
-                  placeholder="Filtrar por nombre de franquicia"
-                  options={franchiseList.map((item) => ({
-                    value: item.id,
-                    label: item.name,
-                  }))}
-                  onChange={onChangeFranchise}
-                  components={{
-                    MenuList: (menuListProps) => (
-                      <SelectMenuButton
-                        {...menuListProps}
-                        onLoadMoreFranchises={onLoadMoreFranchises}
-                      />
-                    ),
-                  }}
-                />
+                <div className="form-control-select">
+                  <AsyncSelect
+                    maxMenuHeight={160}
+                    loadingMessage={() => "Cargando Franquicias..."}
+                    placeholder="Filtrar por nombre de franquicia"
+                    className="react-select-container"
+                    classNamePrefix="react-select"
+                    onChange={onChangeFranchise}
+                    defaultOptions={franchiseList.map((f) => ({
+                      label: f.name,
+                      value: f.id,
+                    }))}
+                    loadOptions={(inputValue) =>
+                      filterFranchisesByName(inputValue)
+                    }
+                    components={{
+                      MenuList: (menuListProps) => (
+                        <SelectMenuButton {...menuListProps} />
+                      ),
+                    }}
+                    noOptionsMessage={() => "No hay opciones"}
+                  />
+                </div>
               ) : null}
             </div>
             <div className="w-15 align-self-end">
@@ -697,15 +710,21 @@ const CashierManagment = () => {
                           name="franchiseId"
                           control={control}
                           render={({ onChange, ref, value }) => (
-                            <RSelect
-                              inputRef={ref}
-                              options={franchiseList.map((item) => ({
-                                label: item.name,
-                                value: item.id,
-                              }))}
-                              placeholder="Selecciona franquicia"
-                              onChange={(e) => onChange(e.value)}
-                            />
+                            <div className="form-control-select">
+                              <AsyncSelect
+                                loadingMessage={() => "Cargando Franquicias..."}
+                                className="react-select-container"
+                                classNamePrefix="react-select"
+                                defaultOptions={franchiseList.map((f) => ({
+                                  label: f.name,
+                                  value: f.name,
+                                }))}
+                                loadOptions={(inputValue) =>
+                                  filterFranchisesByName(inputValue)
+                                }
+                                noOptionsMessage={() => "No hay opciones"}
+                              />
+                            </div>
                           )}
                         />
                       </div>
@@ -887,6 +906,7 @@ const SelectMenuButton = ({ onLoadMoreFranchises, ...props }) => {
       {props.children}
       <div className="w-100 d-flex aling-items-center justify-content-center">
         <Button
+          type="button"
           onClick={onLoadMoreFranchises}
           className=""
           color="primary"
