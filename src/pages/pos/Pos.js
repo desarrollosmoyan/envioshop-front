@@ -28,6 +28,18 @@ import useTurn from "../../hooks/useTurn";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useCookie } from "react-use";
+export const getMe = async ({ token }) => {
+  try {
+    const { data } = await request({
+      method: "GET",
+      url: "/me",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return data;
+  } catch (error) {}
+};
 export default function Pos() {
   const { end } = useTurn();
   //const { getOne } = useUser("cashier");
@@ -40,20 +52,10 @@ export default function Pos() {
   useEffect(() => {
     makeAllRequest();
   }, []);
-  const getMe = async () => {
-    try {
-      const { data } = await request({
-        method: "GET",
-        url: "/me",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return data;
-    } catch (error) {}
-  };
+  console.log({ rating });
+
   const makeAllRequest = async () => {
-    const { user } = await getMe();
+    const { user } = await getMe({ token });
     setCashier(user);
     //await getOne(user.id, setCashier);
   };
@@ -161,15 +163,24 @@ export default function Pos() {
                 Punto de Venta
               </BlockTitle>
             </BlockHeadContent>
-            <BlockHeadContent>
+            <BlockHeadContent className="d-flex gap-1 h-100">
               <Button
-                color="danger"
-                onClick={() => setCloseTurnModal(true)}
+                color="warning"
+                onClick={() => history.push("/")}
                 className="text-uppercase d-flex align-items-center"
               >
-                Cerrar turno
-                <em className="icon ni ni-cross-sm"></em>
+                <em className="icon ni ni-caret-left-fill"></em> Volver
               </Button>
+              {cashier?.type !== "admin" && (
+                <Button
+                  color="danger"
+                  onClick={() => setCloseTurnModal(true)}
+                  className="text-uppercase d-flex align-items-center"
+                >
+                  Cerrar turno
+                  <em className="icon ni ni-cross-sm"></em>
+                </Button>
+              )}
             </BlockHeadContent>
           </BlockBetween>
         </BlockHead>

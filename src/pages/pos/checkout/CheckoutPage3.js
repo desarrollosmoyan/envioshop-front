@@ -47,6 +47,7 @@ export default function CheckoutPage3({ setPage, company }) {
       type: "info",
       position: "bottom-right",
     });
+    console.log("entrd here");
     try {
       const { data } = await request({
         method: "POST",
@@ -63,10 +64,11 @@ export default function CheckoutPage3({ setPage, company }) {
           Authorization: `Bearer ${token}`,
         },
       });
-      if (data.shipment.document.content === "") {
-        dispatch(setPdf({ message: "Se debe crear manualmente." }));
+      if (!data?.shipment?.document?.content) {
+        dispatch(setPdf({ data: "Se debe crear manualmente." }));
+      } else {
+        dispatch(setPdf({ data: data.shipment.document.content }));
       }
-      dispatch(setPdf({ data: data.shipment.document.content }));
       toast.update(toastLoading, {
         render: "Envio creado con éxito",
         type: "success",

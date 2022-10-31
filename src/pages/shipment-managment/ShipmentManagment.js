@@ -49,6 +49,7 @@ export default function ShipmentManagment() {
   const [count, setCount] = useState(0);
   const { getAll, getCount, getAllFranchisesWithSales } = useShipment();
   const [token] = useCookie("token");
+
   //const { currentPage, limit } = useSelector((state) => state.shipmentPage);
   //const [currentFranchise, setCurrentFranchise] = useState({});
   const columns = [
@@ -79,17 +80,20 @@ export default function ShipmentManagment() {
     },
     {
       name: "Documento",
-      cell: (row) => (
-        <a
-          download={`Documento-Envio-${new Date(
-            row.createdAt
-          ).toLocaleDateString()}`}
-          target="_blank"
-          href={`data:application/pdf;base64,${row.shipmentPdf}`}
-        >
-          <Button color="primary">Descargar PDF</Button>
-        </a>
-      ),
+      cell: (row) => {
+        console.log({ row });
+        return (
+          <a
+            download={`Documento-Envio-${new Date(
+              row.createdAt
+            ).toLocaleDateString()}`}
+            target="_blank"
+            href={`data:application/pdf;base64,${row.shipmentPdf}`}
+          >
+            <Button color="primary">Descargar PDF</Button>
+          </a>
+        );
+      },
       selector: (row) => "Descargar Documento",
     },
   ];
@@ -310,16 +314,28 @@ export default function ShipmentManagment() {
                       <span>{parseFloat(item.shipmentPrice)} MXN</span>
                     </DataTableRow>
                     <DataTableRow>
-                      <a
-                        download={`Documento-Envio-${new Date(
-                          item.createdAt
-                        ).toLocaleDateString()}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        href={`data:application/pdf;base64,${item.shipmentPdf}`}
-                      >
-                        <Button color="primary">Descargar PDF</Button>
-                      </a>
+                      {!item?.shipmentPdf ||
+                      item?.shipmentPdf === "No tiene documento" ? (
+                        <Button
+                          color="primary"
+                          disabled
+                          className="mx-auto"
+                          style={{ cursor: "default" }}
+                        >
+                          Descargar PDF
+                        </Button>
+                      ) : (
+                        <a
+                          download={`Documento-Envio-${new Date(
+                            item.createdAt
+                          ).toLocaleDateString()}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          href={`data:application/pdf;base64,${item.shipmentPdf}`}
+                        >
+                          <Button color="primary">Descargar PDF</Button>
+                        </a>
+                      )}
                     </DataTableRow>
                   </DataTableItem>
                 ))
