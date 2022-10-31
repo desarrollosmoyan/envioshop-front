@@ -146,22 +146,7 @@ const FranchiseManagment = () => {
       return item;
     });
     setFranchisesList([...newData]);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  // Changing state value when searching name
-  /* useEffect(() => {
-    if (onSearchText !== "") {
-      const filteredObject = userData.filter((item) => {
-        return (
-          item.name.toLowerCase().includes(onSearchText.toLowerCase()) ||
-          item.email.toLowerCase().includes(onSearchText.toLowerCase())
-        );
-      });
-      setFranchisesList([...filteredObject]);
-    } else {
-      setFranchisesList([]);
-    }
-  }, [onSearchText, setFranchisesList]);*/
-
+  }, []);
   // function to change the selected property of an item
   const onSelectChange = (e, id) => {
     let newData = franchisesList;
@@ -303,7 +288,7 @@ const FranchiseManagment = () => {
     );
   }, [searchValue, currentPage, itemPerPage]);
   // Get current list, pagination
-  //const indexOfLastItem = currentPage * itemPerPage;
+
   //const indexOfFirstItem = indexOfLastItem - itemPerPage;
   const currentItems = franchisesList;
   const exportCSV = () => {
@@ -319,16 +304,6 @@ const FranchiseManagment = () => {
     const exportType = exportFromJSON.types.csv;
     exportFromJSON({ data, fileName, exportType });
   };
-  /*useEffect(() => {
-    if (cityName === "") return;
-    getAll(
-      [(cityPage - 1) * itemPerList, itemPerList],
-      setFranchisesList,
-      setCount,
-      cityName
-    ).catch((error) => console.log(error));
-  }, [cityName]);*/
-  //console.log(franchisesList);
   // Change Page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
