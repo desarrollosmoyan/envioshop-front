@@ -119,6 +119,7 @@ const FranchiseManagment = () => {
       set(data.franchises);
       setCount(data.total);
     } catch (error) {
+      console.log(error);
       toast("Algo salió mal!", { type: "error" });
     }
   };
@@ -341,7 +342,7 @@ const FranchiseManagment = () => {
   const { errors, register, handleSubmit } = useForm();
   return (
     <React.Fragment>
-      <Head title="User List - Default"></Head>
+      <Head title="Gestion de Franquicias"></Head>
       <Content>
         <BlockHead size="sm">
           <BlockBetween>

@@ -178,7 +178,7 @@ export default function ShipmentManagment() {
                 Gestión de envios
               </BlockTitle>
               <BlockDes>
-                <p>{`Actualmente hay ${count} envios.`}</p>
+                <p>{`Actualmente hay ${count ? count : 0} envios.`}</p>
               </BlockDes>
             </BlockHeadContent>
             <BlockHeadContent></BlockHeadContent>

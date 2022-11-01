@@ -354,7 +354,7 @@ const CashierManagment = () => {
   const { errors, register, handleSubmit, control } = useForm();
   return (
     <React.Fragment>
-      <Head title="User List - Default"></Head>
+      <Head title="Gestión de Cajeros"></Head>
       <Content>
         <BlockHead size="sm">
           <BlockBetween>
